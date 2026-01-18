@@ -82,6 +82,24 @@ export const useGameLogic = () => {
     }
   }, [score, highScore]);
 
+  // Safety net: if a gem tile exists on the board and hasn't been celebrated yet,
+  // trigger the celebration (covers edge-cases where merge detection might miss).
+  useEffect(() => {
+    if (newGemAchieved) return;
+
+    const valuesOnBoard = grid.flat().filter((t): t is Tile => t !== null).map(t => t.value);
+    const highestUncelebrated = GEM_TILE_VALUES
+      .slice()
+      .reverse()
+      .find(v => valuesOnBoard.includes(v) && !achievedGems.has(v));
+
+    if (highestUncelebrated) {
+      console.log('Gem celebration (safety net) for:', highestUncelebrated);
+      setNewGemAchieved(highestUncelebrated);
+      setAchievedGems(prev => new Set([...prev, highestUncelebrated]));
+    }
+  }, [grid, achievedGems, newGemAchieved]);
+
   const canMove = useCallback((grid: Grid): boolean => {
     // Check for empty cells
     if (getEmptyCells(grid).length > 0) return true;
@@ -252,6 +270,7 @@ export const useGameLogic = () => {
     setGameOver(false);
     setIsMoving(false);
     setNewGemAchieved(null);
+    setAchievedGems(new Set());
   }, []);
 
   const clearGemCelebration = useCallback(() => {
