@@ -198,9 +198,7 @@ export const GemCelebration = ({ gemValue, onComplete }: GemCelebrationProps) =>
             alt={gem.name}
             className={cn(
               "object-contain animate-gem-pulse",
-              gemValue === 11 ? "w-80 h-80" : // Diamond
-              gemValue === 9 ? "w-80 h-80" : // Sapphire
-              "w-64 h-64" // Emerald & Ruby
+              gemValue === 11 ? "w-80 h-80" : "w-64 h-64"
             )}
             style={{ color: gem.color }}
           />
