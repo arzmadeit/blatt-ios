@@ -94,7 +94,7 @@ export const BlattGame = () => {
         <img 
           src={blattLogo} 
           alt="BLATT" 
-          className="h-16 w-auto drop-shadow-[0_0_12px_hsl(var(--gold))] animate-pulse-gold" 
+          className="h-20 w-auto" 
         />
         <Button
           onClick={resetGame}
