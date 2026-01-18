@@ -174,7 +174,10 @@ export const GemCelebration = ({ gemValue, onComplete }: GemCelebrationProps) =>
           <img
             src={gem.image}
             alt={gem.name}
-            className="w-64 h-64 object-contain animate-gem-pulse"
+            className={cn(
+              "object-contain animate-gem-pulse",
+              gemValue === 9 ? "w-80 h-80" : "w-64 h-64"
+            )}
             style={{ color: gem.color }}
           />
         </div>
