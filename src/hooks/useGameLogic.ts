@@ -109,10 +109,19 @@ export const useGameLogic = () => {
     return false;
   }, []);
 
+  // Haptic feedback helper for iOS
+  const triggerHaptic = useCallback((intensity: 'light' | 'medium' | 'heavy' = 'light') => {
+    if ('vibrate' in navigator) {
+      const durations = { light: 10, medium: 25, heavy: 50 };
+      navigator.vibrate(durations[intensity]);
+    }
+  }, []);
+
   const move = useCallback((direction: Direction) => {
     if (isMoving || gameOver) return;
     
     setIsMoving(true);
+    let hasMerged = false;
 
     setGrid(currentGrid => {
       let newGrid = cloneGrid(currentGrid);
@@ -138,6 +147,7 @@ export const useGameLogic = () => {
               isMerged: true,
             });
             scoreGain += Math.pow(2, newValue);
+            hasMerged = true;
             
             // Check if this is a new gem achievement
             if (GEM_TILE_VALUES.includes(newValue)) {
@@ -205,6 +215,11 @@ export const useGameLogic = () => {
       if (moved) {
         newGrid = addRandomTile(newGrid);
         setScore(s => s + scoreGain);
+        
+        // Trigger haptic feedback on merge
+        if (hasMerged) {
+          triggerHaptic('light');
+        }
 
         // Check for new gem achievements
         if (newlyCreatedGems.length > 0) {
@@ -233,7 +248,7 @@ export const useGameLogic = () => {
 
       return moved ? newGrid : currentGrid;
     });
-  }, [isMoving, gameOver, canMove, achievedGems]);
+  }, [isMoving, gameOver, canMove, achievedGems, triggerHaptic]);
 
   const resetGame = useCallback(() => {
     let newGrid = createEmptyGrid();
