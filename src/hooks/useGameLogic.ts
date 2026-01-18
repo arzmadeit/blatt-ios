@@ -72,10 +72,8 @@ export const useGameLogic = () => {
   const [gameOver, setGameOver] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
   const [newGemAchieved, setNewGemAchieved] = useState<number | null>(null);
-  const [achievedGems, setAchievedGems] = useState<Set<number>>(() => {
-    const saved = localStorage.getItem('blatt-achieved-gems');
-    return saved ? new Set(JSON.parse(saved)) : new Set();
-  });
+  // Reset achieved gems each session so celebrations always show
+  const [achievedGems, setAchievedGems] = useState<Set<number>>(new Set());
 
   useEffect(() => {
     if (score > highScore) {
@@ -221,18 +219,13 @@ export const useGameLogic = () => {
           triggerHaptic('light');
         }
 
-        // Check for new gem achievements
+        // Check for new gem achievements - show celebration for each gem once per session
         if (newlyCreatedGems.length > 0) {
-          // Find the highest new gem that hasn't been celebrated yet
           const uncelebratedGem = newlyCreatedGems.find(gem => !achievedGems.has(gem));
           if (uncelebratedGem) {
+            console.log('Gem celebration triggered for:', uncelebratedGem);
             setNewGemAchieved(uncelebratedGem);
-            setAchievedGems(prev => {
-              const newSet = new Set(prev);
-              newSet.add(uncelebratedGem);
-              localStorage.setItem('blatt-achieved-gems', JSON.stringify([...newSet]));
-              return newSet;
-            });
+            setAchievedGems(prev => new Set([...prev, uncelebratedGem]));
           }
         }
 
