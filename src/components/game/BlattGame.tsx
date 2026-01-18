@@ -91,7 +91,11 @@ export const BlattGame = () => {
     >
       {/* Header */}
       <div className="flex items-center justify-between w-full max-w-[360px] mb-6">
-        <img src={blattLogo} alt="BLATT" className="h-12 w-auto" />
+        <img 
+          src={blattLogo} 
+          alt="BLATT" 
+          className="h-16 w-auto drop-shadow-[0_0_12px_hsl(var(--gold))] animate-pulse-gold" 
+        />
         <Button
           onClick={resetGame}
           variant="outline"
