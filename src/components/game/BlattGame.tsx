@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { Grid } from './Grid';
 import { ScoreBoard } from './ScoreBoard';
 import { GameOver } from './GameOver';
@@ -19,6 +19,8 @@ export const BlattGame = () => {
     newGemAchieved,
     clearGemCelebration,
   } = useGameLogic();
+  const [debugGem, setDebugGem] = useState<number | null>(null);
+  const [showDebug, setShowDebug] = useState(false);
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
@@ -120,10 +122,51 @@ export const BlattGame = () => {
         Use arrow keys or swipe to move tiles
       </p>
 
+      {/* Debug Panel */}
+      <div className="mt-4">
+        <button 
+          onClick={() => setShowDebug(!showDebug)}
+          className="text-xs text-muted-foreground/50 hover:text-muted-foreground"
+        >
+          {showDebug ? 'Hide' : 'Preview'} Gem Animations
+        </button>
+        {showDebug && (
+          <div className="flex gap-2 mt-2">
+            <button 
+              onClick={() => setDebugGem(8)} 
+              className="px-3 py-1 text-xs bg-emerald-600 text-white rounded hover:bg-emerald-500"
+            >
+              Emerald
+            </button>
+            <button 
+              onClick={() => setDebugGem(9)} 
+              className="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-500"
+            >
+              Sapphire
+            </button>
+            <button 
+              onClick={() => setDebugGem(10)} 
+              className="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-500"
+            >
+              Ruby
+            </button>
+            <button 
+              onClick={() => setDebugGem(11)} 
+              className="px-3 py-1 text-xs bg-purple-600 text-white rounded hover:bg-purple-500"
+            >
+              Diamond
+            </button>
+          </div>
+        )}
+      </div>
+
       {/* Gem Celebration Overlay */}
       <GemCelebration 
-        gemValue={newGemAchieved} 
-        onComplete={clearGemCelebration} 
+        gemValue={debugGem || newGemAchieved} 
+        onComplete={() => {
+          setDebugGem(null);
+          clearGemCelebration();
+        }} 
       />
     </div>
   );
