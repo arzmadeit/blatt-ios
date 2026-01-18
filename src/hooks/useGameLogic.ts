@@ -13,7 +13,10 @@ type Grid = (Tile | null)[][];
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 const GRID_SIZE = 4;
-const MAX_TILE_VALUE = 10;
+const MAX_TILE_VALUE = 11;
+
+// Gem tile values that trigger celebration
+export const GEM_TILE_VALUES = [8, 9, 10, 11]; // emerald, sapphire, ruby, diamond
 
 let tileIdCounter = 0;
 
@@ -68,6 +71,11 @@ export const useGameLogic = () => {
   });
   const [gameOver, setGameOver] = useState(false);
   const [isMoving, setIsMoving] = useState(false);
+  const [newGemAchieved, setNewGemAchieved] = useState<number | null>(null);
+  const [achievedGems, setAchievedGems] = useState<Set<number>>(() => {
+    const saved = localStorage.getItem('blatt-achieved-gems');
+    return saved ? new Set(JSON.parse(saved)) : new Set();
+  });
 
   useEffect(() => {
     if (score > highScore) {
@@ -110,6 +118,7 @@ export const useGameLogic = () => {
       let newGrid = cloneGrid(currentGrid);
       let moved = false;
       let scoreGain = 0;
+      const newlyCreatedGems: number[] = [];
 
       const processLine = (line: (Tile | null)[]): (Tile | null)[] => {
         // Remove nulls and pack tiles
@@ -129,6 +138,12 @@ export const useGameLogic = () => {
               isMerged: true,
             });
             scoreGain += Math.pow(2, newValue);
+            
+            // Check if this is a new gem achievement
+            if (GEM_TILE_VALUES.includes(newValue)) {
+              newlyCreatedGems.push(newValue);
+            }
+            
             i += 2;
             moved = true;
           } else {
@@ -191,6 +206,21 @@ export const useGameLogic = () => {
         newGrid = addRandomTile(newGrid);
         setScore(s => s + scoreGain);
 
+        // Check for new gem achievements
+        if (newlyCreatedGems.length > 0) {
+          // Find the highest new gem that hasn't been celebrated yet
+          const uncelebratedGem = newlyCreatedGems.find(gem => !achievedGems.has(gem));
+          if (uncelebratedGem) {
+            setNewGemAchieved(uncelebratedGem);
+            setAchievedGems(prev => {
+              const newSet = new Set(prev);
+              newSet.add(uncelebratedGem);
+              localStorage.setItem('blatt-achieved-gems', JSON.stringify([...newSet]));
+              return newSet;
+            });
+          }
+        }
+
         // Check game over after adding new tile
         setTimeout(() => {
           if (!canMove(newGrid)) {
@@ -203,7 +233,7 @@ export const useGameLogic = () => {
 
       return moved ? newGrid : currentGrid;
     });
-  }, [isMoving, gameOver, canMove]);
+  }, [isMoving, gameOver, canMove, achievedGems]);
 
   const resetGame = useCallback(() => {
     let newGrid = createEmptyGrid();
@@ -213,6 +243,11 @@ export const useGameLogic = () => {
     setScore(0);
     setGameOver(false);
     setIsMoving(false);
+    setNewGemAchieved(null);
+  }, []);
+
+  const clearGemCelebration = useCallback(() => {
+    setNewGemAchieved(null);
   }, []);
 
   // Get all tiles as flat array for rendering
@@ -226,5 +261,7 @@ export const useGameLogic = () => {
     gameOver,
     move,
     resetGame,
+    newGemAchieved,
+    clearGemCelebration,
   };
 };

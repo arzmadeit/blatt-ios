@@ -12,6 +12,7 @@ import tile7 from '@/assets/tiles/tile_7.png';
 import tile8 from '@/assets/tiles/tile_8.png';
 import tile9 from '@/assets/tiles/tile_9.png';
 import tile10 from '@/assets/tiles/tile_10.png';
+import tile11 from '@/assets/tiles/tile_11.png';
 
 const tileImages: Record<number, string> = {
   1: tile1,
@@ -24,6 +25,7 @@ const tileImages: Record<number, string> = {
   8: tile8,
   9: tile9,
   10: tile10,
+  11: tile11,
 };
 
 interface TileProps {
@@ -58,7 +60,7 @@ export const Tile = ({ value, row, col, isNew, isMerged }: TileProps) => {
   const x = col * (CELL_SIZE + GAP) + GAP;
   const y = row * (CELL_SIZE + GAP) + GAP;
 
-  const imageUrl = tileImages[value] || tileImages[10];
+  const imageUrl = tileImages[value] || tileImages[11];
 
   return (
     <div

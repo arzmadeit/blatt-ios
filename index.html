@@ -2,13 +2,23 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
     <title>Blatt - A Contemplative Puzzle Game</title>
     <meta name="description" content="Blatt is an elegant 2048-style puzzle game with beautiful mandala tiles. Merge tiles, achieve high scores, and enjoy a slow, contemplative gaming experience." />
     <meta name="theme-color" content="#1a1f3a" />
 
+    <!-- iOS Safari specific -->
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="Blatt" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+
+    <!-- Prevent phone number detection -->
+    <meta name="format-detection" content="telephone=no" />
+
+    <!-- Open Graph / Social -->
     <meta property="og:title" content="Blatt - A Contemplative Puzzle Game" />
-    <meta property="og:description" content="An elegant 2048-style puzzle game with beautiful mandala tiles." />
+    <meta property="og:description" content="An elegant 2048-style puzzle game with beautiful gemstone tiles." />
     <meta property="og:type" content="website" />
     
     <meta name="twitter:card" content="summary_large_image" />

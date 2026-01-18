@@ -2,16 +2,26 @@ import { useEffect, useCallback, useRef } from 'react';
 import { Grid } from './Grid';
 import { ScoreBoard } from './ScoreBoard';
 import { GameOver } from './GameOver';
+import { GemCelebration } from './GemCelebration';
 import { useGameLogic } from '@/hooks/useGameLogic';
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
 
 export const BlattGame = () => {
-  const { tiles, score, highScore, gameOver, move, resetGame } = useGameLogic();
+  const { 
+    tiles, 
+    score, 
+    highScore, 
+    gameOver, 
+    move, 
+    resetGame,
+    newGemAchieved,
+    clearGemCelebration,
+  } = useGameLogic();
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
-    if (gameOver) return;
+    if (gameOver || newGemAchieved) return;
 
     switch (e.key) {
       case 'ArrowUp':
@@ -39,7 +49,7 @@ export const BlattGame = () => {
         move('right');
         break;
     }
-  }, [move, gameOver]);
+  }, [move, gameOver, newGemAchieved]);
 
   const handleTouchStart = useCallback((e: React.TouchEvent) => {
     const touch = e.touches[0];
@@ -47,7 +57,7 @@ export const BlattGame = () => {
   }, []);
 
   const handleTouchEnd = useCallback((e: React.TouchEvent) => {
-    if (!touchStartRef.current || gameOver) return;
+    if (!touchStartRef.current || gameOver || newGemAchieved) return;
 
     const touch = e.changedTouches[0];
     const deltaX = touch.clientX - touchStartRef.current.x;
@@ -65,7 +75,7 @@ export const BlattGame = () => {
     }
 
     touchStartRef.current = null;
-  }, [move, gameOver]);
+  }, [move, gameOver, newGemAchieved]);
 
   useEffect(() => {
     window.addEventListener('keydown', handleKeyDown);
@@ -106,6 +116,12 @@ export const BlattGame = () => {
       <p className="mt-6 text-sm text-muted-foreground text-center font-body">
         Use arrow keys or swipe to move tiles
       </p>
+
+      {/* Gem Celebration Overlay */}
+      <GemCelebration 
+        gemValue={newGemAchieved} 
+        onComplete={clearGemCelebration} 
+      />
     </div>
   );
 };
