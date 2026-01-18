@@ -16,8 +16,8 @@
     --popover: 222 50% 8%;
     --popover-foreground: 45 30% 90%;
 
-    /* Gold accent */
-    --primary: 45 90% 50%;
+    /* Reflective gold accent */
+    --primary: 43 85% 55%;
     --primary-foreground: 222 47% 11%;
 
     --secondary: 222 40% 18%;
@@ -26,24 +26,26 @@
     --muted: 222 40% 15%;
     --muted-foreground: 222 20% 55%;
 
-    --accent: 45 80% 45%;
+    --accent: 43 80% 50%;
     --accent-foreground: 222 47% 11%;
 
     --destructive: 0 84.2% 60.2%;
     --destructive-foreground: 210 40% 98%;
 
-    --border: 45 50% 30%;
+    --border: 43 60% 40%;
     --input: 222 40% 20%;
-    --ring: 45 90% 50%;
+    --ring: 43 85% 55%;
 
     --radius: 0.5rem;
 
-    /* Game specific tokens */
+    /* Game specific tokens - reflective gold */
     --grid-bg: 222 50% 6%;
     --cell-bg: 222 45% 12%;
-    --gold: 45 90% 50%;
-    --gold-glow: 45 100% 60%;
-    --gold-dark: 45 70% 35%;
+    --gold: 43 85% 55%;
+    --gold-light: 45 95% 70%;
+    --gold-glow: 45 100% 65%;
+    --gold-dark: 40 75% 40%;
+    --gold-merge: 43 70% 25%;
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 240 5.3% 26.1%;
@@ -62,19 +64,19 @@
     --card-foreground: 45 30% 90%;
     --popover: 222 50% 8%;
     --popover-foreground: 45 30% 90%;
-    --primary: 45 90% 50%;
+    --primary: 43 85% 55%;
     --primary-foreground: 222 47% 11%;
     --secondary: 222 40% 18%;
     --secondary-foreground: 45 30% 90%;
     --muted: 222 40% 15%;
     --muted-foreground: 222 20% 55%;
-    --accent: 45 80% 45%;
+    --accent: 43 80% 50%;
     --accent-foreground: 222 47% 11%;
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 45 50% 30%;
+    --border: 43 60% 40%;
     --input: 222 40% 20%;
-    --ring: 45 90% 50%;
+    --ring: 43 85% 55%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -105,32 +107,46 @@
     font-family: 'Cormorant Garamond', serif;
   }
 
-  /* Golden glow effect */
+  /* Reflective gold text effect */
+  .gold-text {
+    background: linear-gradient(
+      135deg, 
+      hsl(43 85% 55%) 0%, 
+      hsl(45 95% 70%) 25%, 
+      hsl(43 85% 55%) 50%, 
+      hsl(40 75% 40%) 75%, 
+      hsl(43 85% 55%) 100%
+    );
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  /* Golden glow effect - subtle */
   .gold-glow {
     box-shadow: 
-      0 0 20px hsl(45 100% 60% / 0.4),
-      0 0 40px hsl(45 100% 60% / 0.2),
-      0 0 60px hsl(45 100% 60% / 0.1);
+      0 0 10px hsl(43 85% 55% / 0.25),
+      0 0 20px hsl(43 85% 55% / 0.15);
   }
 
   .gold-glow-intense {
     box-shadow: 
-      0 0 30px hsl(45 100% 60% / 0.6),
-      0 0 60px hsl(45 100% 60% / 0.4),
-      0 0 90px hsl(45 100% 60% / 0.2);
+      0 0 15px hsl(43 85% 55% / 0.4),
+      0 0 30px hsl(43 85% 55% / 0.25),
+      0 0 45px hsl(43 85% 55% / 0.15);
   }
 
   /* Gold border glow */
   .gold-border-glow {
     box-shadow: 
-      inset 0 0 20px hsl(45 90% 50% / 0.15),
-      0 0 15px hsl(45 90% 50% / 0.3);
+      inset 0 0 10px hsl(43 85% 55% / 0.1),
+      0 0 8px hsl(43 85% 55% / 0.2);
   }
 
   /* Tile animations */
   @keyframes tile-pop {
     0% { transform: scale(1); }
-    50% { transform: scale(1.15); }
+    50% { transform: scale(1.08); }
     100% { transform: scale(1); }
   }
 
@@ -145,23 +161,24 @@
     }
   }
 
+  /* Subtle merge glow - much less intense */
   @keyframes merge-glow {
     0% { 
-      box-shadow: 0 0 0 0 hsl(45 100% 60% / 0.8);
+      box-shadow: 0 0 0 0 hsl(43 85% 55% / 0.4);
     }
     50% { 
       box-shadow: 
-        0 0 30px 10px hsl(45 100% 60% / 0.6),
-        0 0 60px 20px hsl(45 100% 60% / 0.3);
+        0 0 12px 4px hsl(43 85% 55% / 0.3),
+        0 0 24px 8px hsl(43 85% 55% / 0.15);
     }
     100% { 
-      box-shadow: 0 0 0 0 hsl(45 100% 60% / 0);
+      box-shadow: 0 0 0 0 hsl(43 85% 55% / 0);
     }
   }
 
   @keyframes pulse-gold {
     0%, 100% { 
-      opacity: 0.5;
+      opacity: 0.7;
     }
     50% { 
       opacity: 1;
@@ -177,22 +194,28 @@
   }
 
   .animate-merge-glow {
-    animation: merge-glow 0.4s ease-out;
+    animation: merge-glow 0.3s ease-out;
   }
 
   .animate-pulse-gold {
     animation: pulse-gold 2s ease-in-out infinite;
   }
 
-  /* Gem celebration animations */
+  /* Gem celebration animations - longer and more dramatic */
   @keyframes gem-zoom {
     0% {
-      transform: scale(0.3);
+      transform: scale(0.1);
       opacity: 0;
     }
-    50% {
-      transform: scale(1.1);
+    30% {
+      transform: scale(1.2);
       opacity: 1;
+    }
+    50% {
+      transform: scale(0.95);
+    }
+    70% {
+      transform: scale(1.05);
     }
     100% {
       transform: scale(1);
@@ -203,21 +226,30 @@
   @keyframes light-flash {
     0% {
       opacity: 0;
+      transform: scale(0.5);
     }
-    20% {
+    15% {
       opacity: 1;
+      transform: scale(1.5);
+    }
+    40% {
+      opacity: 0.8;
+      transform: scale(1);
     }
     100% {
-      opacity: 0.4;
+      opacity: 0.3;
+      transform: scale(1.2);
     }
   }
 
   @keyframes gem-pulse {
     0%, 100% {
       transform: scale(1);
+      filter: brightness(1);
     }
     50% {
-      transform: scale(1.05);
+      transform: scale(1.03);
+      filter: brightness(1.2);
     }
   }
 
@@ -228,27 +260,46 @@
     }
     50% {
       opacity: 1;
-      transform: scale(1) translateY(-20px);
+      transform: scale(1.2) translateY(-30px);
     }
     100% {
       opacity: 0;
-      transform: scale(0) translateY(-40px);
+      transform: scale(0) translateY(-60px);
+    }
+  }
+
+  @keyframes light-rays {
+    0% {
+      opacity: 0;
+      transform: scale(0.3) rotate(0deg);
+    }
+    20% {
+      opacity: 1;
+      transform: scale(1) rotate(15deg);
+    }
+    100% {
+      opacity: 0.4;
+      transform: scale(1.5) rotate(30deg);
     }
   }
 
   .animate-gem-zoom {
-    animation: gem-zoom 0.7s ease-out forwards;
+    animation: gem-zoom 1.2s ease-out forwards;
   }
 
   .animate-light-flash {
-    animation: light-flash 0.5s ease-out forwards;
+    animation: light-flash 1s ease-out forwards;
+  }
+
+  .animate-light-rays {
+    animation: light-rays 1.5s ease-out forwards;
   }
 
   .animate-gem-pulse {
-    animation: gem-pulse 1.5s ease-in-out infinite;
+    animation: gem-pulse 2s ease-in-out infinite;
   }
 
   .animate-sparkle {
-    animation: sparkle 1s ease-out infinite;
+    animation: sparkle 1.5s ease-out infinite;
   }
 }

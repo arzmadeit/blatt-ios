@@ -90,7 +90,7 @@ export const BlattGame = () => {
     >
       {/* Header */}
       <div className="flex items-center justify-between w-full max-w-[360px] mb-6">
-        <h1 className="text-4xl font-display text-primary tracking-widest font-semibold animate-pulse-gold">
+        <h1 className="text-4xl font-display tracking-widest font-semibold animate-pulse-gold gold-text">
           BLATT
         </h1>
         <Button

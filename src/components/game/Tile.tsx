@@ -51,7 +51,7 @@ export const Tile = ({ value, row, col, isNew, isMerged }: TileProps) => {
       const timer = setTimeout(() => {
         setShowMergeGlow(false);
         setShowPopAnimation(false);
-      }, 400);
+      }, 300);
       
       return () => clearTimeout(timer);
     }
@@ -75,6 +75,8 @@ export const Tile = ({ value, row, col, isNew, isMerged }: TileProps) => {
         width: CELL_SIZE,
         height: CELL_SIZE,
         transform: `translate(${x}px, ${y}px)`,
+        // Subtle golden background glow for merged tiles
+        backgroundColor: showMergeGlow ? 'hsl(43 70% 25% / 0.5)' : 'transparent',
       }}
     >
       <img
@@ -83,13 +85,20 @@ export const Tile = ({ value, row, col, isNew, isMerged }: TileProps) => {
         className="w-full h-full object-cover"
         draggable={false}
       />
-      {/* Gold border overlay */}
+      {/* Gold border overlay with reflective gradient */}
       <div 
         className={cn(
           "absolute inset-0 rounded-lg pointer-events-none",
-          "border-2 border-primary/60",
-          showMergeGlow && "border-primary"
+          showMergeGlow ? "border-2" : "border-[1.5px]"
         )}
+        style={{
+          borderColor: showMergeGlow 
+            ? 'hsl(43 85% 60%)' 
+            : 'hsl(43 70% 45% / 0.7)',
+          background: showMergeGlow 
+            ? 'linear-gradient(135deg, hsl(43 85% 55% / 0.15) 0%, transparent 50%, hsl(43 85% 55% / 0.1) 100%)'
+            : 'linear-gradient(135deg, hsl(43 85% 55% / 0.08) 0%, transparent 50%, hsl(43 85% 55% / 0.05) 100%)',
+        }}
       />
     </div>
   );

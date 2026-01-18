@@ -14,15 +14,17 @@ export const Grid = ({ tiles }: GridProps) => {
 
   return (
     <div 
-      className="relative rounded-xl gold-border-glow"
+      className="relative rounded-xl"
       style={{
         width: gridSize,
         height: gridSize,
         background: 'hsl(var(--grid-bg))',
-        border: '3px solid hsl(var(--gold))',
+        border: '3px solid transparent',
+        borderImage: 'linear-gradient(135deg, hsl(43 85% 55%), hsl(45 95% 70%), hsl(43 85% 55%), hsl(40 75% 40%)) 1',
+        boxShadow: '0 0 15px hsl(43 85% 55% / 0.25), inset 0 0 10px hsl(43 85% 55% / 0.1)',
       }}
     >
-      {/* Background cells */}
+      {/* Background cells with subtle golden tint */}
       {Array.from({ length: GRID_SIZE * GRID_SIZE }).map((_, index) => {
         const row = Math.floor(index / GRID_SIZE);
         const col = index % GRID_SIZE;
@@ -38,7 +40,8 @@ export const Grid = ({ tiles }: GridProps) => {
               height: CELL_SIZE,
               transform: `translate(${x}px, ${y}px)`,
               background: 'hsl(var(--cell-bg))',
-              border: '1px solid hsl(var(--gold) / 0.15)',
+              border: '1px solid hsl(43 70% 45% / 0.12)',
+              boxShadow: 'inset 0 0 8px hsl(43 85% 55% / 0.05)',
             }}
           />
         );
