@@ -6,6 +6,7 @@ import { GemCelebration } from './GemCelebration';
 import { useGameLogic } from '@/hooks/useGameLogic';
 import { Button } from '@/components/ui/button';
 import { RotateCcw } from 'lucide-react';
+import blattLogo from '@/assets/blatt-logo.png';
 
 export const BlattGame = () => {
   const { 
@@ -90,9 +91,7 @@ export const BlattGame = () => {
     >
       {/* Header */}
       <div className="flex items-center justify-between w-full max-w-[360px] mb-6">
-        <h1 className="text-4xl font-display tracking-widest font-semibold animate-pulse-gold gold-text">
-          BLATT
-        </h1>
+        <img src={blattLogo} alt="BLATT" className="h-12 w-auto" />
         <Button
           onClick={resetGame}
           variant="outline"
