@@ -183,4 +183,72 @@
   .animate-pulse-gold {
     animation: pulse-gold 2s ease-in-out infinite;
   }
+
+  /* Gem celebration animations */
+  @keyframes gem-zoom {
+    0% {
+      transform: scale(0.3);
+      opacity: 0;
+    }
+    50% {
+      transform: scale(1.1);
+      opacity: 1;
+    }
+    100% {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  @keyframes light-flash {
+    0% {
+      opacity: 0;
+    }
+    20% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0.4;
+    }
+  }
+
+  @keyframes gem-pulse {
+    0%, 100% {
+      transform: scale(1);
+    }
+    50% {
+      transform: scale(1.05);
+    }
+  }
+
+  @keyframes sparkle {
+    0% {
+      opacity: 0;
+      transform: scale(0) translateY(0);
+    }
+    50% {
+      opacity: 1;
+      transform: scale(1) translateY(-20px);
+    }
+    100% {
+      opacity: 0;
+      transform: scale(0) translateY(-40px);
+    }
+  }
+
+  .animate-gem-zoom {
+    animation: gem-zoom 0.7s ease-out forwards;
+  }
+
+  .animate-light-flash {
+    animation: light-flash 0.5s ease-out forwards;
+  }
+
+  .animate-gem-pulse {
+    animation: gem-pulse 1.5s ease-in-out infinite;
+  }
+
+  .animate-sparkle {
+    animation: sparkle 1s ease-out infinite;
+  }
 }
