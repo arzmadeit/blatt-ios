@@ -62,97 +62,162 @@ export const GemCelebration = ({ gemValue, onComplete }: GemCelebrationProps) =>
     <div
       className={cn(
         "fixed inset-0 z-50 flex items-center justify-center",
-        "transition-opacity duration-700",
+        "transition-opacity duration-500",
         isZooming ? "opacity-100" : "opacity-0"
       )}
     >
       {/* Dark overlay */}
-      <div className="absolute inset-0 bg-background/95 backdrop-blur-md" />
+      <div className="absolute inset-0 bg-background/98 backdrop-blur-lg" />
 
-      {/* Light flash burst behind gem */}
+      {/* Intense center light beam burst */}
       <div
         className={cn(
-          "absolute inset-0 pointer-events-none",
-          showFlash && "animate-light-flash"
+          "absolute w-[800px] h-[800px] pointer-events-none",
+          showFlash && "animate-light-beam"
         )}
         style={{
-          background: `radial-gradient(circle at center, ${gem.glowColor} 0%, ${gem.color}80 30%, transparent 70%)`,
+          background: `radial-gradient(circle at center, ${gem.glowColor} 0%, ${gem.color}90 20%, ${gem.color}40 40%, transparent 70%)`,
         }}
       />
 
-      {/* Light rays effect */}
+      {/* Light rays shooting out from center */}
       <div
         className={cn(
-          "absolute w-[600px] h-[600px] pointer-events-none",
+          "absolute w-[900px] h-[900px] pointer-events-none",
           showFlash && "animate-light-rays"
         )}
         style={{
-          background: `conic-gradient(from 0deg, transparent 0deg, ${gem.glowColor}40 10deg, transparent 20deg, ${gem.glowColor}30 30deg, transparent 40deg, ${gem.glowColor}40 50deg, transparent 60deg, ${gem.glowColor}30 70deg, transparent 80deg, ${gem.glowColor}40 90deg, transparent 100deg, ${gem.glowColor}30 110deg, transparent 120deg)`,
+          background: `conic-gradient(from 0deg, 
+            transparent 0deg, ${gem.glowColor}80 5deg, transparent 10deg,
+            transparent 20deg, ${gem.glowColor}60 25deg, transparent 30deg,
+            transparent 40deg, ${gem.glowColor}80 45deg, transparent 50deg,
+            transparent 60deg, ${gem.glowColor}60 65deg, transparent 70deg,
+            transparent 80deg, ${gem.glowColor}80 85deg, transparent 90deg,
+            transparent 100deg, ${gem.glowColor}60 105deg, transparent 110deg,
+            transparent 120deg, ${gem.glowColor}80 125deg, transparent 130deg,
+            transparent 140deg, ${gem.glowColor}60 145deg, transparent 150deg,
+            transparent 160deg, ${gem.glowColor}80 165deg, transparent 170deg,
+            transparent 180deg, ${gem.glowColor}60 185deg, transparent 190deg,
+            transparent 200deg, ${gem.glowColor}80 205deg, transparent 210deg,
+            transparent 220deg, ${gem.glowColor}60 225deg, transparent 230deg,
+            transparent 240deg, ${gem.glowColor}80 245deg, transparent 250deg,
+            transparent 260deg, ${gem.glowColor}60 265deg, transparent 270deg,
+            transparent 280deg, ${gem.glowColor}80 285deg, transparent 290deg,
+            transparent 300deg, ${gem.glowColor}60 305deg, transparent 310deg,
+            transparent 320deg, ${gem.glowColor}80 325deg, transparent 330deg,
+            transparent 340deg, ${gem.glowColor}60 345deg, transparent 350deg,
+            transparent 355deg, ${gem.glowColor}80 360deg
+          )`,
           borderRadius: '50%',
         }}
       />
 
-      {/* Gem container with zoom animation */}
+      {/* Starburst effect behind gem */}
       <div
         className={cn(
-          "relative z-10 flex flex-col items-center gap-6",
-          "transition-all duration-1000 ease-out",
-          isZooming ? "animate-gem-zoom" : "scale-50 opacity-0"
+          "absolute w-[500px] h-[500px] pointer-events-none",
+          showFlash && "animate-starburst"
         )}
+        style={{
+          background: `conic-gradient(from 45deg,
+            ${gem.glowColor}90 0deg, transparent 15deg,
+            ${gem.glowColor}90 30deg, transparent 45deg,
+            ${gem.glowColor}90 60deg, transparent 75deg,
+            ${gem.glowColor}90 90deg, transparent 105deg,
+            ${gem.glowColor}90 120deg, transparent 135deg,
+            ${gem.glowColor}90 150deg, transparent 165deg,
+            ${gem.glowColor}90 180deg, transparent 195deg,
+            ${gem.glowColor}90 210deg, transparent 225deg,
+            ${gem.glowColor}90 240deg, transparent 255deg,
+            ${gem.glowColor}90 270deg, transparent 285deg,
+            ${gem.glowColor}90 300deg, transparent 315deg,
+            ${gem.glowColor}90 330deg, transparent 345deg,
+            ${gem.glowColor}90 360deg
+          )`,
+          borderRadius: '50%',
+        }}
+      />
+
+      {/* Pulsing center glow */}
+      <div
+        className={cn(
+          "absolute w-96 h-96 rounded-full pointer-events-none",
+          isZooming && "animate-center-glow"
+        )}
+        style={{
+          background: `radial-gradient(circle, ${gem.glowColor}60 0%, ${gem.color}30 40%, transparent 70%)`,
+          boxShadow: `0 0 100px ${gem.color}80, 0 0 200px ${gem.color}40`,
+        }}
+      />
+
+      {/* Gem container with zoom + hover animation */}
+      <div
+        className={cn(
+          "relative z-10 flex flex-col items-center gap-8",
+          isZooming ? "animate-gem-zoom" : "scale-0 opacity-0"
+        )}
+        style={{
+          animationFillMode: 'forwards',
+        }}
       >
-        {/* Gem image with glow */}
+        {/* Gem image with intense glow and hover */}
         <div
-          className="relative animate-gem-pulse"
+          className={cn(
+            "relative",
+            isZooming && "animate-gem-hover"
+          )}
           style={{
-            filter: `drop-shadow(0 0 40px ${gem.glowColor}) drop-shadow(0 0 80px ${gem.color}80) drop-shadow(0 0 120px ${gem.color}40)`,
+            animationDelay: '1s',
+            filter: `drop-shadow(0 0 50px ${gem.glowColor}) drop-shadow(0 0 100px ${gem.color}) drop-shadow(0 0 150px ${gem.color}80)`,
           }}
         >
           <img
             src={gem.image}
             alt={gem.name}
-            className="w-56 h-56 object-contain"
+            className="w-64 h-64 object-contain animate-gem-pulse"
+            style={{ color: gem.color }}
           />
         </div>
 
-        {/* Gem name */}
+        {/* Gem name with glow */}
         <h2
-          className="font-display text-4xl tracking-[0.3em] font-semibold"
+          className="font-display text-5xl tracking-[0.4em] font-bold"
           style={{ 
             color: gem.color, 
-            textShadow: `0 0 30px ${gem.glowColor}, 0 0 60px ${gem.color}80` 
+            textShadow: `0 0 40px ${gem.glowColor}, 0 0 80px ${gem.color}, 0 0 120px ${gem.color}60` 
           }}
         >
           {gem.name.toUpperCase()}
         </h2>
       </div>
 
-      {/* Sparkle particles - more of them */}
+      {/* Sparkle particles - more intense */}
       <div className="absolute inset-0 pointer-events-none overflow-hidden">
-        {[...Array(20)].map((_, i) => (
+        {[...Array(30)].map((_, i) => (
           <div
             key={i}
-            className="absolute w-2 h-2 bg-white rounded-full animate-sparkle"
+            className="absolute w-3 h-3 bg-white rounded-full animate-sparkle"
             style={{
-              left: `${15 + Math.random() * 70}%`,
-              top: `${15 + Math.random() * 70}%`,
-              animationDelay: `${i * 0.15}s`,
+              left: `${10 + Math.random() * 80}%`,
+              top: `${10 + Math.random() * 80}%`,
+              animationDelay: `${i * 0.1}s`,
               opacity: 0,
-              boxShadow: '0 0 6px 2px white',
+              boxShadow: `0 0 10px 4px white, 0 0 20px 6px ${gem.glowColor}`,
             }}
           />
         ))}
       </div>
 
-      {/* Additional outer glow ring */}
+      {/* Outer glow ring */}
       <div
         className={cn(
-          "absolute w-80 h-80 rounded-full pointer-events-none",
+          "absolute w-[450px] h-[450px] rounded-full pointer-events-none",
           "transition-all duration-1000",
-          isZooming ? "opacity-60 scale-100" : "opacity-0 scale-50"
+          isZooming ? "opacity-70 scale-100" : "opacity-0 scale-50"
         )}
         style={{
-          background: `radial-gradient(circle, transparent 40%, ${gem.color}30 60%, transparent 80%)`,
-          boxShadow: `0 0 60px ${gem.color}40, inset 0 0 60px ${gem.color}20`,
+          background: `radial-gradient(circle, transparent 50%, ${gem.color}40 70%, transparent 90%)`,
+          boxShadow: `0 0 80px ${gem.color}50, inset 0 0 80px ${gem.color}30`,
         }}
       />
     </div>
