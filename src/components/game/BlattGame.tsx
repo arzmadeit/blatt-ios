@@ -5,9 +5,15 @@ import { GameOver } from './GameOver';
 import { GemCelebration } from './GemCelebration';
 import { useGameLogic } from '@/hooks/useGameLogic';
 import { Button } from '@/components/ui/button';
-import { RotateCcw } from 'lucide-react';
+import { Menu, RotateCcw, HelpCircle, Star } from 'lucide-react';
+import {
+  Sheet,
+  SheetContent,
+  SheetHeader,
+  SheetTitle,
+  SheetTrigger,
+} from '@/components/ui/sheet';
 import blattLogo from '@/assets/blatt-logo.png';
-
 export const BlattGame = () => {
   const { 
     tiles, 
@@ -98,15 +104,54 @@ export const BlattGame = () => {
           alt="BLATT" 
           className="h-28 w-auto -ml-10" 
         />
-        <Button
-          onClick={resetGame}
-          variant="outline"
-          size="icon"
-          className="border-primary/50 text-primary hover:bg-primary/10"
-          title="New Game"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </Button>
+        <Sheet>
+          <SheetTrigger asChild>
+            <Button
+              variant="outline"
+              size="icon"
+              className="border-primary/50 text-primary hover:bg-primary/10"
+            >
+              <Menu className="w-5 h-5" />
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-[280px] bg-background border-primary/30">
+            <SheetHeader>
+              <SheetTitle className="font-display text-primary">Menu</SheetTitle>
+            </SheetHeader>
+            <div className="flex flex-col gap-3 mt-8">
+              <Button
+                onClick={resetGame}
+                variant="outline"
+                className="w-full justify-start gap-3 border-primary/50 text-foreground hover:bg-primary/10"
+              >
+                <RotateCcw className="w-4 h-4" />
+                New Game
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 border-primary/50 text-foreground hover:bg-primary/10"
+                onClick={() => {
+                  // Could open a dialog with instructions
+                  alert('Swipe or use arrow keys to move tiles. Merge matching tiles to create gems. Reach the Diamond to win!');
+                }}
+              >
+                <HelpCircle className="w-4 h-4" />
+                How to Play
+              </Button>
+              <Button
+                variant="outline"
+                className="w-full justify-start gap-3 border-primary/50 text-foreground hover:bg-primary/10"
+                onClick={() => {
+                  // Replace with actual App Store URL
+                  window.open('https://apps.apple.com/app/id000000000', '_blank');
+                }}
+              >
+                <Star className="w-4 h-4" />
+                Rate Us
+              </Button>
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <ScoreBoard score={score} highScore={highScore} />
