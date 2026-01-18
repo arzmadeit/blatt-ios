@@ -150,6 +150,26 @@ export const GemCelebration = ({ gemValue, onComplete }: GemCelebrationProps) =>
         }}
       />
 
+      {/* Diamond-only massive light burst */}
+      {gemValue === 11 && (
+        <div
+          className={cn(
+            "absolute w-[1200px] h-[1200px] pointer-events-none",
+            showFlash && "animate-diamond-burst"
+          )}
+          style={{
+            background: `radial-gradient(circle at center, 
+              white 0%, 
+              hsl(0, 0%, 95%) 5%,
+              hsl(0, 0%, 90%)80 15%, 
+              hsl(0, 0%, 85%)50 30%, 
+              hsl(0, 0%, 80%)20 50%, 
+              transparent 70%)`,
+            boxShadow: `0 0 200px 100px rgba(255,255,255,0.8), 0 0 400px 200px rgba(255,255,255,0.4)`,
+          }}
+        />
+      )}
+
       {/* Gem container with zoom + hover animation */}
       <div
         className={cn(
@@ -168,7 +188,9 @@ export const GemCelebration = ({ gemValue, onComplete }: GemCelebrationProps) =>
           )}
           style={{
             animationDelay: '1s',
-            filter: `drop-shadow(0 0 50px ${gem.glowColor}) drop-shadow(0 0 100px ${gem.color}) drop-shadow(0 0 150px ${gem.color}80)`,
+            filter: gemValue === 11 
+              ? `drop-shadow(0 0 80px white) drop-shadow(0 0 150px white) drop-shadow(0 0 250px ${gem.color})`
+              : `drop-shadow(0 0 50px ${gem.glowColor}) drop-shadow(0 0 100px ${gem.color}) drop-shadow(0 0 150px ${gem.color}80)`,
           }}
         >
           <img
@@ -176,7 +198,10 @@ export const GemCelebration = ({ gemValue, onComplete }: GemCelebrationProps) =>
             alt={gem.name}
             className={cn(
               "object-contain animate-gem-pulse",
-              gemValue === 9 ? "w-80 h-80" : "w-64 h-64"
+              gemValue === 11 ? "w-[400px] h-[400px]" : // Diamond - much bigger
+              gemValue === 10 ? "w-96 h-96" : // Ruby - bigger
+              gemValue === 9 ? "w-80 h-80" : // Sapphire
+              "w-64 h-64" // Emerald
             )}
             style={{ color: gem.color }}
           />
@@ -184,10 +209,15 @@ export const GemCelebration = ({ gemValue, onComplete }: GemCelebrationProps) =>
 
         {/* Gem name with glow */}
         <h2
-          className="font-display text-5xl tracking-[0.4em] font-bold"
+          className={cn(
+            "font-display tracking-[0.4em] font-bold",
+            gemValue === 11 ? "text-6xl" : "text-5xl"
+          )}
           style={{ 
             color: gem.color, 
-            textShadow: `0 0 40px ${gem.glowColor}, 0 0 80px ${gem.color}, 0 0 120px ${gem.color}60` 
+            textShadow: gemValue === 11 
+              ? `0 0 60px white, 0 0 120px white, 0 0 180px ${gem.color}`
+              : `0 0 40px ${gem.glowColor}, 0 0 80px ${gem.color}, 0 0 120px ${gem.color}60` 
           }}
         >
           {gem.name.toUpperCase()}
