@@ -32,7 +32,6 @@ workflows:
       - name: Sync Capacitor (SPM Mode)
         script: |
           export PATH="$HOME/.bun/bin:$PATH"
-          # Just sync the files, no Pod install needed
           npx cap sync ios
 
       - name: Set up code signing
@@ -40,11 +39,15 @@ workflows:
           keychain initialize
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
-          xcode-project use-profiles
+          
+          # SAFETY FIX 1: Force the Bundle ID in the project file to match exactly
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" ios/App/App.xcodeproj/project.pbxproj
+          
+          # SAFETY FIX 2: Explicitly apply profile to the 'App' target
+          xcode-project use-profiles --project "ios/App/App.xcodeproj" --target "App"
 
       - name: Build IPA
         script: |
-          # FIX: Build the .xcodeproj file directly (since you have no workspace)
           xcode-project build-ipa --project "ios/App/App.xcodeproj" --scheme "App"
 
     publishing:
