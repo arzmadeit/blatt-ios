@@ -29,12 +29,15 @@ workflows:
           export PATH="$HOME/.bun/bin:$PATH"
           bun run build
 
-      - name: Sync Capacitor
+      - name: Sync iOS & Install Pods
         script: |
           export PATH="$HOME/.bun/bin:$PATH"
-          # We use npx here as it is sometimes more reliable for CocoaPods
+          # Sync the web code to iOS
           npx cap sync ios
-          
+          # Go into the folder and force the file creation
+          cd ios
+          pod install --repo-update
+
       - name: Set up code signing
         script: |
           keychain initialize
@@ -44,7 +47,7 @@ workflows:
 
       - name: Build IPA
         script: |
-          # We hardcode the workspace and scheme to avoid variable errors
+          # Use the workspace that we just created in the previous step
           xcode-project build-ipa --workspace "ios/App/App.xcworkspace" --scheme "App"
 
     publishing:
