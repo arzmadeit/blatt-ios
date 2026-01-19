@@ -13,51 +13,50 @@ workflows:
       branch_patterns:
         - pattern: main
     scripts:
-      - name: Install Bun
+      - name: Install Bun & Dependencies
         script: |
           curl -fsSL https://bun.sh/install | bash
           export BUN_INSTALL="$HOME/.bun"
           export PATH="$BUN_INSTALL/bin:$PATH"
-
-      - name: Install Dependencies
-        script: |
-          export PATH="$HOME/.bun/bin:$PATH"
           bun install
 
-      - name: Build Web App
+      - name: Build Web App & Sync
         script: |
           export PATH="$HOME/.bun/bin:$PATH"
           bun run build
-
-      - name: Sync Capacitor (SPM Mode)
-        script: |
-          export PATH="$HOME/.bun/bin:$PATH"
           npx cap sync ios
+
+      - name: 🧹 Sanitize Xcode Project (The Fix)
+        script: |
+          # This is the "Nuclear" step. It removes conflicting settings from your project file.
+          echo "Removing old signing settings..."
+          project_file="ios/App/App.xcodeproj/project.pbxproj"
+          
+          # Remove "Automatic" signing style
+          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' $project_file
+          
+          # Remove any hardcoded Development Team IDs from your personal machine
+          sed -i '' '/DEVELOPMENT_TEAM =/d' $project_file
+          
+          # Remove any hardcoded Provisioning Profiles
+          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER =/d' $project_file
+          
+          echo "✅ Project file sanitized."
 
       - name: Set up code signing
         script: |
           keychain initialize
-          # Fetch the files from Apple (Since your account is clean, this creates NEW valid ones)
+          
+          # Fetch fresh certificates from Apple
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
           
-          # FORCE FIX 1: Update the Bundle ID in the project file
-          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" ios/App/App.xcodeproj/project.pbxproj
-          
-          # FORCE FIX 2: Set Manual Signing in the project file
-          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' ios/App/App.xcodeproj/project.pbxproj
-
-          # DEBUG: Check if the ID was actually changed
-          echo "--- CHECKING BUNDLE ID ---"
-          grep "PRODUCT_BUNDLE_IDENTIFIER" ios/App/App.xcodeproj/project.pbxproj | head -n 1
-          echo "----------------------------"
-          
-          # Apply the profiles to the project
+          # Apply the new profile to the CLEAN project file
           xcode-project use-profiles --project "ios/App/App.xcodeproj"
 
       - name: Build IPA
         script: |
-          # FORCE FIX 3: Pass "Manual" style directly to the build command
+          # Build with strictly Manual signing
           xcode-project build-ipa             --project "ios/App/App.xcodeproj"             --scheme "App"             --archive-flags "CODE_SIGN_STYLE=Manual"
 
     publishing:
