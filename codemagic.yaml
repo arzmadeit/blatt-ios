@@ -33,9 +33,23 @@ workflows:
         script: |
           export PATH="$HOME/.bun/bin:$PATH"
           npx cap sync ios
-          # THE FIX: Go into the 'App' folder where the Podfile actually lives
-          cd ios/App
-          pod install --repo-update
+          
+          # DEBUG: List all files so we can see what is happening
+          echo "--- FILE STRUCTURE DEBUG ---"
+          ls -R ios
+          echo "----------------------------"
+
+          # SMART FIX: Find the Podfile wherever it is
+          PODFILE_PATH=$(find ios -name Podfile | head -n 1)
+          
+          if [ -z "$PODFILE_PATH" ]; then
+            echo "❌ CRITICAL ERROR: Podfile is missing from the Git repo!"
+            exit 1
+          else
+            echo "✅ Found Podfile at: $PODFILE_PATH"
+            cd $(dirname "$PODFILE_PATH")
+            pod install --repo-update
+          fi
 
       - name: Set up code signing
         script: |
@@ -46,8 +60,9 @@ workflows:
 
       - name: Build IPA
         script: |
-          # The workspace will be created by the step above
-          xcode-project build-ipa --workspace "ios/App/App.xcworkspace" --scheme "App"
+          # We search for the workspace similarly to avoid path errors
+          WORKSPACE_PATH=$(find ios -name "*.xcworkspace" | head -n 1)
+          xcode-project build-ipa --workspace "$WORKSPACE_PATH" --scheme "App"
 
     publishing:
       app_store_connect:
