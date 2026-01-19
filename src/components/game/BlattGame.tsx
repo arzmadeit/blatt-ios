@@ -160,10 +160,6 @@ export const BlattGame = () => {
         {gameOver && <GameOver score={score} onRetry={resetGame} />}
       </div>
 
-      {/* Instructions */}
-      <p className="mt-6 text-sm text-muted-foreground text-center font-body">
-        Use arrow keys or swipe to move tiles
-      </p>
 
       {/* Gem Celebration Overlay */}
       <GemCelebration 
