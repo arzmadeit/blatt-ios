@@ -37,14 +37,15 @@ workflows:
       - name: Set up code signing
         script: |
           keychain initialize
+          # This command will now create the NEW certificate since your account is empty
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
           
-          # SAFETY FIX 1: Force the Bundle ID in the project file to match exactly
+          # Force the Bundle ID in the project file to match exactly
           sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" ios/App/App.xcodeproj/project.pbxproj
           
-          # SAFETY FIX 2: Explicitly apply profile to the 'App' target
-          xcode-project use-profiles --project "ios/App/App.xcodeproj" --target "App"
+          # FIX: Removed the invalid '--target' flag. Pointing to the project is enough.
+          xcode-project use-profiles --project "ios/App/App.xcodeproj"
 
       - name: Build IPA
         script: |
