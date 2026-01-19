@@ -7,60 +7,38 @@ workflows:
         - apple_credentials
       vars:
         BUNDLE_ID: "com.arzmadeit.blatt"
+        XCODE_PROJECT: "ios/App/App.xcodeproj"
+        XCODE_SCHEME: "App"
     triggering:
       events:
         - push
       branch_patterns:
         - pattern: main
     scripts:
-      - name: 1. Setup Environment (Bun & Dependencies)
+      - name: 1. Install Tools & Build Web App
         script: |
-          echo "🔹 Installing Bun..."
           curl -fsSL https://bun.sh/install | bash
           export BUN_INSTALL="$HOME/.bun"
           export PATH="$BUN_INSTALL/bin:$PATH"
-          
-          echo "🔹 Installing Project Dependencies..."
           bun install
-          
-          echo "🔹 Building Web Assets..."
           bun run build
-          
-          echo "🔹 Syncing iOS Project..."
           npx cap sync ios
 
-      - name: 2. Create Signing Keys (The Critical Step)
+      - name: 2. Create Signing Certificates (Clean Slate)
         script: |
-          export PATH="$HOME/.bun/bin:$PATH"
-          
-          echo "🔹 Initializing Keychain..."
           keychain initialize
-
-          echo "🔹 Fetching Signing Files from Apple..."
-          # This command tells Codemagic: "If keys don't exist, CREATE them."
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-          
-          echo "🔹 Adding Certificates to Keychain..."
           keychain add-certificates
-          
-          echo "🔹 Installing Provisioning Profiles..."
-          # This takes the downloaded profile and puts it where Xcode can find it
-          xcode-project use-profiles
+          xcode-project use-profiles --project "$XCODE_PROJECT"
 
-      - name: 3. Verify Keys (Debug Checkpoint)
+      - name: 3. Verify Profile Exists (Safety Check)
         script: |
-          # We check if the profile actually exists before trying to build
-          echo "🔍 Checking for Provisioning Profiles..."
-          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
-          
-          echo "✅ If you see a .mobileprovision file above, we are safe."
+          echo "🔍 Checking if profile was downloaded..."
+          ls -1 ~/Library/MobileDevice/Provisioning\ Profiles/
 
-      - name: 4. Build the App (IPA)
+      - name: 4. Build the App
         script: |
-          echo "🔹 Starting Build..."
-          
-          # We force 'Manual' signing because we just manually downloaded the keys above
-          xcode-project build-ipa             --project "ios/App/App.xcodeproj"             --scheme "App"             --archive-flags "CODE_SIGN_STYLE=Manual"
+          xcode-project build-ipa             --project "$XCODE_PROJECT"             --scheme "$XCODE_SCHEME"             --archive-flags "CODE_SIGN_STYLE=Manual"
 
     publishing:
       app_store_connect:
