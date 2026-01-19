@@ -12,7 +12,8 @@ import { useGameLogic } from '@/hooks/useGameLogic';
 import { usePlayerStats } from '@/hooks/usePlayerStats';
 import { useAchievements } from '@/hooks/useAchievements';
 import { Button } from '@/components/ui/button';
-import { Sparkles, BookOpen, Star, BarChart3, Trophy, Crown, Medal, Mail } from 'lucide-react';
+import { Sparkles, BookOpen, Star, BarChart3, Trophy, Crown, Medal, Mail, Shield } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import {
   Sheet,
   SheetContent,
@@ -46,6 +47,7 @@ const OrnateStarIcon = ({ className }: { className?: string }) => (
 );
 
 export const BlattGame = () => {
+  const navigate = useNavigate();
   const { 
     tiles, 
     score, 
@@ -283,6 +285,14 @@ export const BlattGame = () => {
               >
                 <Mail className="w-5 h-5" />
                 Contact Support
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
+                onClick={() => navigate('/privacy-policy')}
+              >
+                <Shield className="w-5 h-5" />
+                Privacy Policy
               </Button>
             </div>
           </SheetContent>
