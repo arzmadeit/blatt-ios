@@ -167,7 +167,10 @@ export const BlattGame = () => {
                 variant="ghost"
                 className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
                 onClick={() => {
-                  window.open('https://apps.apple.com/app/id000000000', '_blank');
+                  // TODO: Replace with your actual App Store URL after publishing
+                  // Example: https://apps.apple.com/app/blatt/id1234567890
+                  const appStoreUrl = 'https://apps.apple.com/app/blatt';
+                  window.open(appStoreUrl, '_blank');
                 }}
               >
                 <Star className="w-5 h-5" />
