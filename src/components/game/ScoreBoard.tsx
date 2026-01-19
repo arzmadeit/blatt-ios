@@ -17,7 +17,7 @@ export const ScoreBoard = ({
   multiplier = 1
 }: ScoreBoardProps) => {
   return (
-    <div className="flex gap-4 mb-6 items-end">
+    <div className="flex gap-4 mb-6 items-stretch">
       {/* Diamond Counter */}
       <div 
         className="flex flex-col items-center justify-center px-3 py-3 rounded-lg bg-secondary gold-border-glow"
