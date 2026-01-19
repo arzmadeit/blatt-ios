@@ -37,21 +37,28 @@ workflows:
       - name: Set up code signing
         script: |
           keychain initialize
+          # Fetch the files from Apple (Since your account is clean, this creates NEW valid ones)
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
           
-          # FORCE FIX 1: Turn off "Automatic Signing" inside the file text
-          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' ios/App/App.xcodeproj/project.pbxproj
-          
-          # FORCE FIX 2: Ensure Bundle ID matches exactly (using a stricter replace command)
+          # FORCE FIX 1: Update the Bundle ID in the project file
           sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" ios/App/App.xcodeproj/project.pbxproj
           
-          # Apply the profile to the manually configured project
+          # FORCE FIX 2: Set Manual Signing in the project file
+          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' ios/App/App.xcodeproj/project.pbxproj
+
+          # DEBUG: Check if the ID was actually changed
+          echo "--- CHECKING BUNDLE ID ---"
+          grep "PRODUCT_BUNDLE_IDENTIFIER" ios/App/App.xcodeproj/project.pbxproj | head -n 1
+          echo "----------------------------"
+          
+          # Apply the profiles to the project
           xcode-project use-profiles --project "ios/App/App.xcodeproj"
 
       - name: Build IPA
         script: |
-          xcode-project build-ipa --project "ios/App/App.xcodeproj" --scheme "App"
+          # FORCE FIX 3: Pass "Manual" style directly to the build command
+          xcode-project build-ipa             --project "ios/App/App.xcodeproj"             --scheme "App"             --archive-flags "CODE_SIGN_STYLE=Manual"
 
     publishing:
       app_store_connect:
