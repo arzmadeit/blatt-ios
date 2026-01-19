@@ -20,7 +20,7 @@ export const ScoreBoard = ({
     <div className="flex gap-4 mb-6 items-end">
       {/* Diamond Counter */}
       <div 
-        className="flex flex-col items-center px-3 py-2 rounded-lg bg-secondary gold-border-glow"
+        className="flex flex-col items-center justify-center px-3 py-3 rounded-lg bg-secondary gold-border-glow"
         style={{ border: '1.5px solid hsl(43 70% 45% / 0.6)' }}
       >
         <img src={diamondImg} alt="Diamonds" className="w-6 h-6" />
