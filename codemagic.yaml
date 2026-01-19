@@ -29,27 +29,11 @@ workflows:
           export PATH="$HOME/.bun/bin:$PATH"
           bun run build
 
-      - name: Sync iOS & Install Pods
+      - name: Sync Capacitor (SPM Mode)
         script: |
           export PATH="$HOME/.bun/bin:$PATH"
+          # Just sync the files, no Pod install needed
           npx cap sync ios
-          
-          # DEBUG: List all files so we can see what is happening
-          echo "--- FILE STRUCTURE DEBUG ---"
-          ls -R ios
-          echo "----------------------------"
-
-          # SMART FIX: Find the Podfile wherever it is
-          PODFILE_PATH=$(find ios -name Podfile | head -n 1)
-          
-          if [ -z "$PODFILE_PATH" ]; then
-            echo "❌ CRITICAL ERROR: Podfile is missing from the Git repo!"
-            exit 1
-          else
-            echo "✅ Found Podfile at: $PODFILE_PATH"
-            cd $(dirname "$PODFILE_PATH")
-            pod install --repo-update
-          fi
 
       - name: Set up code signing
         script: |
@@ -60,9 +44,8 @@ workflows:
 
       - name: Build IPA
         script: |
-          # We search for the workspace similarly to avoid path errors
-          WORKSPACE_PATH=$(find ios -name "*.xcworkspace" | head -n 1)
-          xcode-project build-ipa --workspace "$WORKSPACE_PATH" --scheme "App"
+          # FIX: Build the .xcodeproj file directly (since you have no workspace)
+          xcode-project build-ipa --project "ios/App/App.xcodeproj" --scheme "App"
 
     publishing:
       app_store_connect:
