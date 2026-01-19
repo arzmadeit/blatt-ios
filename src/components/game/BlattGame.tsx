@@ -100,7 +100,7 @@ export const BlattGame = () => {
         <img 
           src={blattLogo} 
           alt="BLATT" 
-          className="h-28 w-auto -ml-10" 
+          className="h-28 w-auto -ml-10 drop-shadow-[0_4px_20px_rgba(0,0,0,0.8)]" 
         />
         <Sheet>
           <SheetTrigger asChild>
