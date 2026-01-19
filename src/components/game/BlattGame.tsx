@@ -5,7 +5,7 @@ import { GameOver } from './GameOver';
 import { GemCelebration } from './GemCelebration';
 import { useGameLogic } from '@/hooks/useGameLogic';
 import { Button } from '@/components/ui/button';
-import { Menu, RotateCcw, HelpCircle, Star } from 'lucide-react';
+import { Sparkles, BookOpen, Star } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -14,6 +14,30 @@ import {
   SheetTrigger,
 } from '@/components/ui/sheet';
 import blattLogo from '@/assets/blatt-logo.png';
+
+// Ornate 8-pointed star SVG component
+const OrnateStarIcon = ({ className }: { className?: string }) => (
+  <svg 
+    viewBox="0 0 24 24" 
+    className={className}
+    fill="none"
+  >
+    <defs>
+      <linearGradient id="goldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+        <stop offset="0%" stopColor="hsl(43, 74%, 66%)" />
+        <stop offset="50%" stopColor="hsl(43, 74%, 79%)" />
+        <stop offset="100%" stopColor="hsl(43, 74%, 66%)" />
+      </linearGradient>
+    </defs>
+    <path 
+      d="M12 0L13.5 8.5L20.5 3.5L15.5 10.5L24 12L15.5 13.5L20.5 20.5L13.5 15.5L12 24L10.5 15.5L3.5 20.5L8.5 13.5L0 12L8.5 10.5L3.5 3.5L10.5 8.5L12 0Z"
+      fill="url(#goldGradient)"
+      stroke="hsl(43, 74%, 49%)"
+      strokeWidth="0.5"
+    />
+  </svg>
+);
+
 export const BlattGame = () => {
   const { 
     tiles, 
@@ -104,47 +128,49 @@ export const BlattGame = () => {
         />
         <Sheet>
           <SheetTrigger asChild>
-            <Button
-              variant="outline"
-              size="icon"
-              className="border-primary/50 text-primary hover:bg-primary/10"
+            <button
+              className="menu-star w-12 h-12 flex items-center justify-center rounded-full bg-transparent hover:drop-shadow-[0_0_12px_hsl(43,74%,49%)] transition-all duration-300"
+              aria-label="Open menu"
             >
-              <Menu className="w-5 h-5" />
-            </Button>
+              <OrnateStarIcon className="w-8 h-8" />
+            </button>
           </SheetTrigger>
-          <SheetContent side="right" className="w-[280px] bg-background border-primary/30">
-            <SheetHeader>
-              <SheetTitle className="font-display text-primary">Menu</SheetTitle>
+          <SheetContent 
+            side="right" 
+            className="w-[280px] bg-[hsl(222,47%,11%)] border-l-2 border-gold/50"
+          >
+            <SheetHeader className="border-b border-gold/30 pb-4">
+              <SheetTitle className="font-display text-2xl gold-text tracking-wider">
+                Menu
+              </SheetTitle>
             </SheetHeader>
-            <div className="flex flex-col gap-3 mt-8">
+            <div className="flex flex-col gap-4 mt-8">
               <Button
                 onClick={resetGame}
-                variant="outline"
-                className="w-full justify-start gap-3 border-primary/50 text-foreground hover:bg-primary/10"
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
               >
-                <RotateCcw className="w-4 h-4" />
+                <Sparkles className="w-5 h-5" />
                 New Game
               </Button>
               <Button
-                variant="outline"
-                className="w-full justify-start gap-3 border-primary/50 text-foreground hover:bg-primary/10"
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
                 onClick={() => {
-                  // Could open a dialog with instructions
                   alert('Swipe or use arrow keys to move tiles. Merge matching tiles to create gems. Reach the Diamond to win!');
                 }}
               >
-                <HelpCircle className="w-4 h-4" />
+                <BookOpen className="w-5 h-5" />
                 How to Play
               </Button>
               <Button
-                variant="outline"
-                className="w-full justify-start gap-3 border-primary/50 text-foreground hover:bg-primary/10"
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
                 onClick={() => {
-                  // Replace with actual App Store URL
                   window.open('https://apps.apple.com/app/id000000000', '_blank');
                 }}
               >
-                <Star className="w-4 h-4" />
+                <Star className="w-5 h-5" />
                 Rate Us
               </Button>
             </div>
