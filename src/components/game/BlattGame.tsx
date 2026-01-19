@@ -1,11 +1,18 @@
-import { useEffect, useCallback, useRef } from 'react';
+import { useEffect, useCallback, useRef, useState } from 'react';
 import { Grid } from './Grid';
 import { ScoreBoard } from './ScoreBoard';
 import { GameOver } from './GameOver';
 import { GemCelebration } from './GemCelebration';
+import { StatsPanel } from './StatsPanel';
+import { AchievementsPanel } from './AchievementsPanel';
+import { AchievementToast } from './AchievementToast';
+import { LeaderboardPanel } from './LeaderboardPanel';
+import { PrestigePanel } from './PrestigePanel';
 import { useGameLogic } from '@/hooks/useGameLogic';
+import { usePlayerStats } from '@/hooks/usePlayerStats';
+import { useAchievements } from '@/hooks/useAchievements';
 import { Button } from '@/components/ui/button';
-import { Sparkles, BookOpen, Star } from 'lucide-react';
+import { Sparkles, BookOpen, Star, BarChart3, Trophy, Crown, Medal } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -49,7 +56,57 @@ export const BlattGame = () => {
     newGemAchieved,
     clearGemCelebration,
   } = useGameLogic();
+  
+  const { 
+    stats, 
+    recordGemCollected, 
+    recordGameEnd, 
+    updateStreak,
+    performPrestige,
+    canPrestige 
+  } = usePlayerStats();
+  
+  const { 
+    achievements, 
+    newlyUnlocked, 
+    clearNewlyUnlocked, 
+    checkAchievements,
+    unlockedCount,
+    totalCount
+  } = useAchievements();
+
   const touchStartRef = useRef<{ x: number; y: number } | null>(null);
+  
+  // Panel states
+  const [statsOpen, setStatsOpen] = useState(false);
+  const [achievementsOpen, setAchievementsOpen] = useState(false);
+  const [leaderboardOpen, setLeaderboardOpen] = useState(false);
+  const [prestigeOpen, setPrestigeOpen] = useState(false);
+
+  // Update streak on mount
+  useEffect(() => {
+    updateStreak();
+  }, [updateStreak]);
+
+  // Record gem when achieved
+  useEffect(() => {
+    if (newGemAchieved) {
+      recordGemCollected(newGemAchieved);
+    }
+  }, [newGemAchieved, recordGemCollected]);
+
+  // Check achievements periodically
+  useEffect(() => {
+    const diamondsOnBoard = tiles.filter(t => t.value === 11).length;
+    checkAchievements(stats, score, diamondsOnBoard);
+  }, [tiles, score, stats, checkAchievements]);
+
+  // Record game end
+  useEffect(() => {
+    if (gameOver && score > 0) {
+      recordGameEnd(score);
+    }
+  }, [gameOver, score, recordGameEnd]);
 
   const handleKeyDown = useCallback((e: KeyboardEvent) => {
     if (gameOver || newGemAchieved) return;
@@ -156,6 +213,47 @@ export const BlattGame = () => {
               <Button
                 variant="ghost"
                 className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
+                onClick={() => setStatsOpen(true)}
+              >
+                <BarChart3 className="w-5 h-5" />
+                Statistics
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
+                onClick={() => setAchievementsOpen(true)}
+              >
+                <Trophy className="w-5 h-5" />
+                Achievements
+                <span className="ml-auto text-xs text-muted-foreground">
+                  {unlockedCount}/{totalCount}
+                </span>
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
+                onClick={() => setLeaderboardOpen(true)}
+              >
+                <Medal className="w-5 h-5" />
+                Leaderboard
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
+                onClick={() => setPrestigeOpen(true)}
+              >
+                <Crown className="w-5 h-5" />
+                Prestige
+                {stats.prestige.level > 0 && (
+                  <span className="ml-auto text-xs gold-text">
+                    Lv.{stats.prestige.level}
+                  </span>
+                )}
+              </Button>
+              <div className="border-t border-gold/20 my-2" />
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
                 onClick={() => {
                   alert('Swipe or use arrow keys to move tiles. Merge matching tiles to create gems. Reach the Diamond to win!');
                 }}
@@ -167,8 +265,6 @@ export const BlattGame = () => {
                 variant="ghost"
                 className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
                 onClick={() => {
-                  // TODO: Replace with your actual App Store URL after publishing
-                  // Example: https://apps.apple.com/app/blatt/id1234567890
                   const appStoreUrl = 'https://apps.apple.com/app/blatt';
                   window.open(appStoreUrl, '_blank');
                 }}
@@ -181,7 +277,13 @@ export const BlattGame = () => {
         </Sheet>
       </div>
 
-      <ScoreBoard score={score} highScore={highScore} />
+      <ScoreBoard 
+        score={score} 
+        highScore={highScore}
+        totalDiamonds={stats.totalDiamondsEarned}
+        prestigeLevel={stats.prestige.level}
+        multiplier={stats.prestige.multiplier}
+      />
 
       {/* Game Grid Container */}
       <div className="relative">
@@ -189,11 +291,40 @@ export const BlattGame = () => {
         {gameOver && <GameOver score={score} onRetry={resetGame} />}
       </div>
 
-
       {/* Gem Celebration Overlay */}
       <GemCelebration 
         gemValue={newGemAchieved} 
         onComplete={clearGemCelebration} 
+      />
+
+      {/* Achievement Toast */}
+      <AchievementToast 
+        achievement={newlyUnlocked} 
+        onComplete={clearNewlyUnlocked} 
+      />
+
+      {/* Panels */}
+      <StatsPanel open={statsOpen} onOpenChange={setStatsOpen} stats={stats} />
+      <AchievementsPanel 
+        open={achievementsOpen} 
+        onOpenChange={setAchievementsOpen} 
+        achievements={achievements}
+        unlockedCount={unlockedCount}
+        totalCount={totalCount}
+      />
+      <LeaderboardPanel 
+        open={leaderboardOpen} 
+        onOpenChange={setLeaderboardOpen} 
+        top10Scores={stats.top10Scores}
+        currentScore={score}
+      />
+      <PrestigePanel 
+        open={prestigeOpen} 
+        onOpenChange={setPrestigeOpen} 
+        prestige={stats.prestige}
+        canPrestige={canPrestige}
+        totalDiamonds={stats.totalDiamondsEarned}
+        onPrestige={performPrestige}
       />
     </div>
   );
