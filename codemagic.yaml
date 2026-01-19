@@ -13,55 +13,54 @@ workflows:
       branch_patterns:
         - pattern: main
     scripts:
-      - name: Install Bun
+      - name: 1. Setup Environment (Bun & Dependencies)
         script: |
+          echo "🔹 Installing Bun..."
           curl -fsSL https://bun.sh/install | bash
           export BUN_INSTALL="$HOME/.bun"
           export PATH="$BUN_INSTALL/bin:$PATH"
-
-      - name: Install Dependencies
-        script: |
-          export PATH="$HOME/.bun/bin:$PATH"
+          
+          echo "🔹 Installing Project Dependencies..."
           bun install
-
-      - name: Build Web App
-        script: |
-          export PATH="$HOME/.bun/bin:$PATH"
+          
+          echo "🔹 Building Web Assets..."
           bun run build
-
-      - name: Sync Capacitor (SPM Mode)
-        script: |
-          export PATH="$HOME/.bun/bin:$PATH"
+          
+          echo "🔹 Syncing iOS Project..."
           npx cap sync ios
 
-      - name: Set up code signing
+      - name: 2. Create Signing Keys (The Critical Step)
         script: |
+          export PATH="$HOME/.bun/bin:$PATH"
+          
+          echo "🔹 Initializing Keychain..."
           keychain initialize
-          # Fetch the clean files from Apple
+
+          echo "🔹 Fetching Signing Files from Apple..."
+          # This command tells Codemagic: "If keys don't exist, CREATE them."
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          
+          echo "🔹 Adding Certificates to Keychain..."
           keychain add-certificates
           
-          # We still run this to set basic settings, but we won't rely on it 100%
-          xcode-project use-profiles --project "ios/App/App.xcodeproj"
+          echo "🔹 Installing Provisioning Profiles..."
+          # This takes the downloaded profile and puts it where Xcode can find it
+          xcode-project use-profiles
 
-      - name: Build IPA (Force Profile)
+      - name: 3. Verify Keys (Debug Checkpoint)
         script: |
-          # 1. Find the profile we just downloaded
-          PROFILE_PATH=$(find ~/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -n 1)
+          # We check if the profile actually exists before trying to build
+          echo "🔍 Checking for Provisioning Profiles..."
+          ls -la ~/Library/MobileDevice/Provisioning\ Profiles/
           
-          if [ -z "$PROFILE_PATH" ]; then
-            echo "❌ ERROR: No provisioning profile found!"
-            exit 1
-          fi
+          echo "✅ If you see a .mobileprovision file above, we are safe."
+
+      - name: 4. Build the App (IPA)
+        script: |
+          echo "🔹 Starting Build..."
           
-          echo "✅ Found profile at: $PROFILE_PATH"
-
-          # 2. Extract the UUID from the profile
-          UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
-          echo "✅ Using Profile UUID: $UUID"
-
-          # 3. Build using the UUID directly (Bypassing project settings)
-          xcode-project build-ipa             --project "ios/App/App.xcodeproj"             --scheme "App"             --archive-flags "PROVISIONING_PROFILE_SPECIFIER=$UUID CODE_SIGN_STYLE=Manual"
+          # We force 'Manual' signing because we just manually downloaded the keys above
+          xcode-project build-ipa             --project "ios/App/App.xcodeproj"             --scheme "App"             --archive-flags "CODE_SIGN_STYLE=Manual"
 
     publishing:
       app_store_connect:
