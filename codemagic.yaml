@@ -1,0 +1,49 @@
+workflows:
+  ios-release:
+    name: iOS App Store Release
+    instance_type: mac_mini_m2
+    environment:
+      groups:
+        - apple_credentials
+      vars:
+        BUNDLE_ID: "com.arzmadeit.blatt"
+        XCODE_SCHEME: "App"
+    triggering:
+      events:
+        - push
+      branch_patterns:
+        - pattern: main
+    scripts:
+      - name: Install Bun
+        script: |
+          curl -fsSL https://bun.sh/install | bash
+          echo 'export BUN_INSTALL="$HOME/.bun"' >> $CM_ENV
+          echo 'export PATH="$BUN_INSTALL/bin:$PATH"' >> $CM_ENV
+
+      - name: Install Dependencies
+        script: |
+          bun install
+
+      - name: Build Web App
+        script: |
+          bun run build
+
+      - name: Sync Capacitor
+        script: |
+          npx cap sync ios
+
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          keychain add-certificates
+          xcode-project use-profiles
+
+      - name: Build IPA
+        script: |
+          xcode-project build-ipa --workspace "ios/App/App.xcworkspace" --scheme "$XCODE_SCHEME"
+
+    publishing:
+      app_store_connect:
+        auth: integration
+        submit_to_testflight: true
