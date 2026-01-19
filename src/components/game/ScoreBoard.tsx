@@ -1,5 +1,8 @@
 import diamondImg from '@/assets/gems/diamond.png';
-import { Crown } from 'lucide-react';
+import crown1 from '@/assets/crowns/crown1.png';
+import crown2 from '@/assets/crowns/crown2.png';
+import crown3 from '@/assets/crowns/crown3.png';
+import crown4 from '@/assets/crowns/crown4.png';
 
 interface ScoreBoardProps {
   score: number;
@@ -9,6 +12,14 @@ interface ScoreBoardProps {
   multiplier?: number;
 }
 
+const getCrownImage = (prestigeLevel: number) => {
+  if (prestigeLevel === 0) return null;
+  if (prestigeLevel <= 2) return crown1;
+  if (prestigeLevel <= 5) return crown2;
+  if (prestigeLevel <= 9) return crown3;
+  return crown4; // Level 10 (max)
+};
+
 export const ScoreBoard = ({ 
   score, 
   highScore, 
@@ -16,6 +27,8 @@ export const ScoreBoard = ({
   prestigeLevel = 0,
   multiplier = 1
 }: ScoreBoardProps) => {
+  const crownImage = getCrownImage(prestigeLevel);
+
   return (
     <div className="flex gap-4 mb-6 items-stretch">
       {/* Diamond Counter */}
@@ -50,8 +63,12 @@ export const ScoreBoard = ({
         className="flex flex-col items-center px-6 py-3 rounded-lg bg-secondary gold-border-glow relative"
         style={{ border: '1.5px solid hsl(43 70% 45% / 0.6)' }}
       >
-        {prestigeLevel > 0 && (
-          <Crown className="absolute -top-2 -right-2 w-5 h-5 text-gold" />
+        {crownImage && (
+          <img 
+            src={crownImage} 
+            alt="Prestige Crown" 
+            className="absolute -top-3 -right-3 w-7 h-7 object-contain"
+          />
         )}
         <span className="text-xs uppercase tracking-widest text-muted-foreground font-display">
           Best
