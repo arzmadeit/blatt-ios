@@ -32,10 +32,9 @@ workflows:
       - name: Sync iOS & Install Pods
         script: |
           export PATH="$HOME/.bun/bin:$PATH"
-          # Sync the web code to iOS
           npx cap sync ios
-          # Go into the folder and force the file creation
-          cd ios
+          # THE FIX: Go into the 'App' folder where the Podfile actually lives
+          cd ios/App
           pod install --repo-update
 
       - name: Set up code signing
@@ -47,7 +46,7 @@ workflows:
 
       - name: Build IPA
         script: |
-          # Use the workspace that we just created in the previous step
+          # The workspace will be created by the step above
           xcode-project build-ipa --workspace "ios/App/App.xcworkspace" --scheme "App"
 
     publishing:
