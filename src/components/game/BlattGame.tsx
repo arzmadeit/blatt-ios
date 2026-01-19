@@ -12,7 +12,7 @@ import { useGameLogic } from '@/hooks/useGameLogic';
 import { usePlayerStats } from '@/hooks/usePlayerStats';
 import { useAchievements } from '@/hooks/useAchievements';
 import { Button } from '@/components/ui/button';
-import { Sparkles, BookOpen, Star, BarChart3, Trophy, Crown, Medal } from 'lucide-react';
+import { Sparkles, BookOpen, Star, BarChart3, Trophy, Crown, Medal, Mail } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -271,6 +271,18 @@ export const BlattGame = () => {
               >
                 <Star className="w-5 h-5" />
                 Rate Us
+              </Button>
+              <Button
+                variant="ghost"
+                className="w-full justify-start gap-4 text-gold hover:text-gold-light hover:bg-gold/10 font-display tracking-wide text-base py-6 transition-all duration-300 hover:drop-shadow-[0_0_8px_hsl(43,74%,49%)]"
+                onClick={() => {
+                  const subject = encodeURIComponent('Blatt App Support');
+                  const body = encodeURIComponent('Hi,\n\nI need help with:\n\n');
+                  window.location.href = `mailto:arzmadeit@gmail.com?subject=${subject}&body=${body}`;
+                }}
+              >
+                <Mail className="w-5 h-5" />
+                Contact Support
               </Button>
             </div>
           </SheetContent>
