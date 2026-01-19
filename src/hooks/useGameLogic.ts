@@ -13,10 +13,11 @@ type Grid = (Tile | null)[][];
 type Direction = 'up' | 'down' | 'left' | 'right';
 
 const GRID_SIZE = 4;
-const MAX_TILE_VALUE = 11;
+// Removed tile cap - infinity mode allows unlimited merging
+// const MAX_TILE_VALUE = 11;
 
-// Gem tile values that trigger celebration
-export const GEM_TILE_VALUES = [8, 9, 10, 11]; // emerald, sapphire, ruby, diamond
+// Gem tile values that trigger celebration (8=emerald, 9=sapphire, 10=ruby, 11=diamond, 12+=transcendent)
+export const GEM_TILE_VALUES = [8, 9, 10, 11]; // Only celebrate first-time gem achievements
 
 let tileIdCounter = 0;
 
@@ -104,21 +105,21 @@ export const useGameLogic = () => {
     // Check for empty cells
     if (getEmptyCells(grid).length > 0) return true;
 
-    // Check for possible merges
+    // Check for possible merges - no tile cap in infinity mode
     for (let row = 0; row < GRID_SIZE; row++) {
       for (let col = 0; col < GRID_SIZE; col++) {
         const tile = grid[row][col];
         if (!tile) continue;
         
-        // Check right
+        // Check right - allow merges at any level
         if (col < GRID_SIZE - 1) {
           const right = grid[row][col + 1];
-          if (right && right.value === tile.value && tile.value < MAX_TILE_VALUE) return true;
+          if (right && right.value === tile.value) return true;
         }
-        // Check down
+        // Check down - allow merges at any level
         if (row < GRID_SIZE - 1) {
           const down = grid[row + 1][col];
-          if (down && down.value === tile.value && tile.value < MAX_TILE_VALUE) return true;
+          if (down && down.value === tile.value) return true;
         }
       }
     }
@@ -152,7 +153,8 @@ export const useGameLogic = () => {
 
         let i = 0;
         while (i < tiles.length) {
-          if (i + 1 < tiles.length && tiles[i].value === tiles[i + 1].value && tiles[i].value < MAX_TILE_VALUE) {
+          // Infinity mode: allow all same-value merges (no MAX_TILE_VALUE check)
+          if (i + 1 < tiles.length && tiles[i].value === tiles[i + 1].value) {
             // Merge tiles
             const newValue = tiles[i].value + 1;
             result.push({
@@ -165,7 +167,7 @@ export const useGameLogic = () => {
             scoreGain += Math.pow(2, newValue);
             hasMerged = true;
             
-            // Check if this is a new gem achievement
+            // Check if this is a new gem achievement (levels 8-11)
             if (GEM_TILE_VALUES.includes(newValue)) {
               newlyCreatedGems.push(newValue);
             }
