@@ -13,51 +13,55 @@ workflows:
       branch_patterns:
         - pattern: main
     scripts:
-      - name: Install Bun & Dependencies
+      - name: Install Bun
         script: |
           curl -fsSL https://bun.sh/install | bash
           export BUN_INSTALL="$HOME/.bun"
           export PATH="$BUN_INSTALL/bin:$PATH"
+
+      - name: Install Dependencies
+        script: |
+          export PATH="$HOME/.bun/bin:$PATH"
           bun install
 
-      - name: Build Web App & Sync
+      - name: Build Web App
         script: |
           export PATH="$HOME/.bun/bin:$PATH"
           bun run build
-          npx cap sync ios
 
-      - name: 🧹 Sanitize Xcode Project (The Fix)
+      - name: Sync Capacitor (SPM Mode)
         script: |
-          # This is the "Nuclear" step. It removes conflicting settings from your project file.
-          echo "Removing old signing settings..."
-          project_file="ios/App/App.xcodeproj/project.pbxproj"
-          
-          # Remove "Automatic" signing style
-          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' $project_file
-          
-          # Remove any hardcoded Development Team IDs from your personal machine
-          sed -i '' '/DEVELOPMENT_TEAM =/d' $project_file
-          
-          # Remove any hardcoded Provisioning Profiles
-          sed -i '' '/PROVISIONING_PROFILE_SPECIFIER =/d' $project_file
-          
-          echo "✅ Project file sanitized."
+          export PATH="$HOME/.bun/bin:$PATH"
+          npx cap sync ios
 
       - name: Set up code signing
         script: |
           keychain initialize
-          
-          # Fetch fresh certificates from Apple
+          # Fetch the clean files from Apple
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
           
-          # Apply the new profile to the CLEAN project file
+          # We still run this to set basic settings, but we won't rely on it 100%
           xcode-project use-profiles --project "ios/App/App.xcodeproj"
 
-      - name: Build IPA
+      - name: Build IPA (Force Profile)
         script: |
-          # Build with strictly Manual signing
-          xcode-project build-ipa             --project "ios/App/App.xcodeproj"             --scheme "App"             --archive-flags "CODE_SIGN_STYLE=Manual"
+          # 1. Find the profile we just downloaded
+          PROFILE_PATH=$(find ~/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -n 1)
+          
+          if [ -z "$PROFILE_PATH" ]; then
+            echo "❌ ERROR: No provisioning profile found!"
+            exit 1
+          fi
+          
+          echo "✅ Found profile at: $PROFILE_PATH"
+
+          # 2. Extract the UUID from the profile
+          UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
+          echo "✅ Using Profile UUID: $UUID"
+
+          # 3. Build using the UUID directly (Bypassing project settings)
+          xcode-project build-ipa             --project "ios/App/App.xcodeproj"             --scheme "App"             --archive-flags "PROVISIONING_PROFILE_SPECIFIER=$UUID CODE_SIGN_STYLE=Manual"
 
     publishing:
       app_store_connect:
