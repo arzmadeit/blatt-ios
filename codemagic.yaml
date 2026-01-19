@@ -37,14 +37,16 @@ workflows:
       - name: Set up code signing
         script: |
           keychain initialize
-          # This command will now create the NEW certificate since your account is empty
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
           
-          # Force the Bundle ID in the project file to match exactly
-          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = .*/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" ios/App/App.xcodeproj/project.pbxproj
+          # FORCE FIX 1: Turn off "Automatic Signing" inside the file text
+          sed -i '' 's/ProvisioningStyle = Automatic;/ProvisioningStyle = Manual;/g' ios/App/App.xcodeproj/project.pbxproj
           
-          # FIX: Removed the invalid '--target' flag. Pointing to the project is enough.
+          # FORCE FIX 2: Ensure Bundle ID matches exactly (using a stricter replace command)
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" ios/App/App.xcodeproj/project.pbxproj
+          
+          # Apply the profile to the manually configured project
           xcode-project use-profiles --project "ios/App/App.xcodeproj"
 
       - name: Build IPA
