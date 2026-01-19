@@ -1,8 +1,12 @@
 import { PrestigeData } from '@/hooks/usePlayerStats';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Crown, Sparkles, TrendingUp, AlertTriangle } from 'lucide-react';
+import { Sparkles, TrendingUp, AlertTriangle } from 'lucide-react';
 import { useState } from 'react';
+import crown1 from '@/assets/crowns/crown1.png';
+import crown2 from '@/assets/crowns/crown2.png';
+import crown3 from '@/assets/crowns/crown3.png';
+import crown4 from '@/assets/crowns/crown4.png';
 
 interface PrestigePanelProps {
   open: boolean;
@@ -12,6 +16,14 @@ interface PrestigePanelProps {
   totalDiamonds: number;
   onPrestige: () => void;
 }
+
+const getCrownImage = (prestigeLevel: number) => {
+  if (prestigeLevel === 0) return null;
+  if (prestigeLevel <= 2) return crown1;
+  if (prestigeLevel <= 5) return crown2;
+  if (prestigeLevel <= 9) return crown3;
+  return crown4; // Level 10 (max)
+};
 
 export const PrestigePanel = ({ 
   open, 
@@ -25,6 +37,8 @@ export const PrestigePanel = ({
   
   const nextMultiplier = Math.min(2.0, 1.0 + ((prestige.level + 1) * 0.1));
   const isMaxPrestige = prestige.multiplier >= 2.0;
+  const crownImage = getCrownImage(prestige.level);
+  const nextCrownImage = getCrownImage(prestige.level + 1);
 
   const handlePrestige = () => {
     onPrestige();
@@ -32,20 +46,16 @@ export const PrestigePanel = ({
     onOpenChange(false);
   };
 
-  // Get crown variant based on prestige level
-  const getCrownStyle = () => {
-    if (prestige.level === 0) return 'text-muted-foreground';
-    if (prestige.level < 5) return 'text-gold';
-    if (prestige.level < 10) return 'text-gold-light animate-pulse-gold';
-    return 'gold-text animate-gem-pulse';
-  };
-
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="bg-[hsl(222,50%,8%)] border-2 border-gold/50 max-w-sm">
         <DialogHeader>
           <DialogTitle className="font-display text-2xl gold-text tracking-wider text-center flex items-center justify-center gap-2">
-            <Crown className={`w-6 h-6 ${getCrownStyle()}`} />
+            {crownImage ? (
+              <img src={crownImage} alt="Prestige Crown" className="w-7 h-7 object-contain" />
+            ) : (
+              <img src={crown1} alt="Prestige Crown" className="w-7 h-7 object-contain opacity-40" />
+            )}
             Prestige
           </DialogTitle>
         </DialogHeader>
@@ -54,7 +64,11 @@ export const PrestigePanel = ({
           {/* Current Status */}
           <div className="text-center space-y-2">
             <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-gold/10 border border-gold/30">
-              <Crown className="w-5 h-5 text-gold" />
+              {crownImage ? (
+                <img src={crownImage} alt="Crown" className="w-6 h-6 object-contain" />
+              ) : (
+                <img src={crown1} alt="Crown" className="w-6 h-6 object-contain opacity-40" />
+              )}
               <span className="font-display text-lg gold-text">
                 Level {prestige.level}
               </span>
@@ -90,6 +104,12 @@ export const PrestigePanel = ({
                   </p>
                 </div>
               </div>
+              {nextCrownImage && nextCrownImage !== crownImage && (
+                <div className="flex items-center gap-3 pt-2 border-t border-gold/10">
+                  <img src={nextCrownImage} alt="Next Crown" className="w-8 h-8 object-contain" />
+                  <p className="text-sm text-muted-foreground">New crown unlocked!</p>
+                </div>
+              )}
             </div>
           )}
 
@@ -112,7 +132,9 @@ export const PrestigePanel = ({
                 className="w-full font-display tracking-widest uppercase py-6"
                 variant={canPrestige && !isMaxPrestige ? 'default' : 'secondary'}
               >
-                <Crown className="w-5 h-5 mr-2" />
+                {nextCrownImage && (
+                  <img src={nextCrownImage} alt="Crown" className="w-5 h-5 mr-2 object-contain" />
+                )}
                 {isMaxPrestige ? 'Max Prestige' : 'Prestige Now'}
               </Button>
               
