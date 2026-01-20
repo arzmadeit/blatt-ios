@@ -24,21 +24,26 @@ workflows:
           bun run build
           npx cap sync ios
 
-      - name: 2. Create Signing Certificates (Clean Slate)
+      - name: 2. Create Signing Certificates
         script: |
           keychain initialize
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           keychain add-certificates
+          # We keep this, but we don't trust it fully anymore
           xcode-project use-profiles --project "$XCODE_PROJECT"
 
-      - name: 3. Verify Profile Exists (Safety Check)
+      - name: 3. Build IPA (The "Force Feed" Fix)
         script: |
-          echo "🔍 Checking if profile was downloaded..."
-          ls -1 ~/Library/MobileDevice/Provisioning\ Profiles/
+          # A. Find the profile file
+          PROFILE_PATH=$(find ~/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -n 1)
+          echo "✅ Found profile at: $PROFILE_PATH"
 
-      - name: 4. Build the App
-        script: |
-          xcode-project build-ipa             --project "$XCODE_PROJECT"             --scheme "$XCODE_SCHEME"             --archive-flags "CODE_SIGN_STYLE=Manual"
+          # B. Extract the UUID (The ID Card Number)
+          UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
+          echo "✅ Force-feeding Profile UUID: $UUID"
+
+          # C. Build passing the UUID explicitly
+          xcode-project build-ipa             --project "$XCODE_PROJECT"             --scheme "$XCODE_SCHEME"             --archive-flags "CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER=$UUID"
 
     publishing:
       app_store_connect:
