@@ -24,7 +24,7 @@ workflows:
           bun run build
           npx cap sync ios
 
-      - name: 2. Force Download to Current Folder
+      - name: 2. Fetch Signing Files
         script: |
           # A. Force Project to match Bundle ID
           sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" $XCODE_PROJECT/project.pbxproj
@@ -32,23 +32,22 @@ workflows:
           # B. Initialize Keychain
           keychain initialize
           
-          # C. Fetch keys AND FORCE SAVE to current directory (.)
-          # We added '--output-path .' so the file cannot hide from us
-          echo "🔹 Fetching signing files..."
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create --output-path .
+          # C. Fetch keys (Standard command)
+          echo "🔹 Fetching signing files from Apple..."
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
           
           # D. Add to Keychain
           keychain add-certificates
 
-      - name: 3. Build IPA (Explicit File Path)
+      - name: 3. Build IPA (Deep Search Search)
         script: |
-          # A. Find the profile in the CURRENT folder (.)
-          # We look for any file ending in .mobileprovision right here
-          PROFILE_PATH=$(find . -maxdepth 1 -name "*.mobileprovision" | head -n 1)
+          # A. DEEP SEARCH: Look everywhere for the downloaded profile
+          echo "🔹 Searching for profile..."
+          PROFILE_PATH=$(find $HOME -name "*.mobileprovision" -print -quit)
           
           if [ -z "$PROFILE_PATH" ]; then
-            echo "❌ CRITICAL ERROR: Apple refused to give us a profile."
-            echo "👉 Check: Does your API Key have 'Admin' or 'App Manager' access?"
+            echo "❌ ERROR: No profile found on the entire machine."
+            echo "This usually means the Apple API Key doesn't have 'Certificate Access'."
             exit 1
           fi
           
