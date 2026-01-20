@@ -24,35 +24,31 @@ workflows:
           bun run build
           npx cap sync ios
 
-      - name: 2. Force Bundle ID & Download Keys
+      - name: 2. Force Download to Current Folder
         script: |
-          # A. Force the Project to match our Bundle ID
-          echo "🔹 Setting Bundle ID to $BUNDLE_ID..."
+          # A. Force Project to match Bundle ID
           sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" $XCODE_PROJECT/project.pbxproj
           
           # B. Initialize Keychain
           keychain initialize
           
-          # C. Fetch files (Create new ones if missing)
+          # C. Fetch keys AND FORCE SAVE to current directory (.)
+          # We added '--output-path .' so the file cannot hide from us
           echo "🔹 Fetching signing files..."
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
+          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create --output-path .
           
           # D. Add to Keychain
           keychain add-certificates
-          
-          # E. DEBUG: List the folder to verify download
-          echo "🔹 Checking Profile Folder:"
-          ls -R ~/Library/MobileDevice/Provisioning\ Profiles/ || echo "❌ Folder not found!"
 
-      - name: 3. Build IPA (Force Feed UUID)
+      - name: 3. Build IPA (Explicit File Path)
         script: |
-          # A. Find the profile (taking the first one found)
-          # We search recursively in case it's in a subfolder
-          PROFILE_PATH=$(find ~/Library/MobileDevice/Provisioning\ Profiles -name "*.mobileprovision" | head -n 1)
+          # A. Find the profile in the CURRENT folder (.)
+          # We look for any file ending in .mobileprovision right here
+          PROFILE_PATH=$(find . -maxdepth 1 -name "*.mobileprovision" | head -n 1)
           
-          # Safety Check: Did we find it?
           if [ -z "$PROFILE_PATH" ]; then
-            echo "❌ ERROR: No profile found! 'fetch-signing-files' failed to save the file."
+            echo "❌ CRITICAL ERROR: Apple refused to give us a profile."
+            echo "👉 Check: Does your API Key have 'Admin' or 'App Manager' access?"
             exit 1
           fi
           
@@ -62,7 +58,7 @@ workflows:
           UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
           echo "✅ UUID: $UUID"
 
-          # C. Build with Force Feed
+          # C. Build
           xcode-project build-ipa             --project "$XCODE_PROJECT"             --scheme "$XCODE_SCHEME"             --archive-flags "CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER=$UUID"
 
     publishing:
