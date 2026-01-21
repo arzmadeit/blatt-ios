@@ -9,13 +9,15 @@ workflows:
         BUNDLE_ID: "com.arzmadeit.blatt"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
+      xcode: latest
+      cocoapods: default
     triggering:
       events:
         - push
       branch_patterns:
         - pattern: main
     scripts:
-      - name: 1. Install Tools & Build Web App
+      - name: Install dependencies and build web app
         script: |
           curl -fsSL https://bun.sh/install | bash
           export BUN_INSTALL="$HOME/.bun"
@@ -24,41 +26,27 @@ workflows:
           bun run build
           npx cap sync ios
 
-      - name: 2. Fetch Signing Files
+      - name: Install CocoaPods dependencies
         script: |
-          # A. Force Project to match Bundle ID
-          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" $XCODE_PROJECT/project.pbxproj
-          
-          # B. Initialize Keychain
+          cd ios/App && pod install
+
+      - name: Set up code signing
+        script: |
+          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" "$XCODE_PROJECT/project.pbxproj"
           keychain initialize
-          
-          # C. Fetch keys (Standard command)
-          echo "🔹 Fetching signing files from Apple..."
           app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-          
-          # D. Add to Keychain
           keychain add-certificates
+          xcode-project use-profiles
 
-      - name: 3. Build IPA (Deep Search Search)
+      - name: Build IPA
         script: |
-          # A. DEEP SEARCH: Look everywhere for the downloaded profile
-          echo "🔹 Searching for profile..."
-          PROFILE_PATH=$(find $HOME -name "*.mobileprovision" -print -quit)
-          
-          if [ -z "$PROFILE_PATH" ]; then
-            echo "❌ ERROR: No profile found on the entire machine."
-            echo "This usually means the Apple API Key doesn't have 'Certificate Access'."
-            exit 1
-          fi
-          
-          echo "✅ Found profile at: $PROFILE_PATH"
+          xcode-project build-ipa \
+            --workspace "ios/App/App.xcworkspace" \
+            --scheme "$XCODE_SCHEME"
 
-          # B. Extract UUID
-          UUID=$(/usr/libexec/PlistBuddy -c "Print :UUID" /dev/stdin <<< $(security cms -D -i "$PROFILE_PATH"))
-          echo "✅ UUID: $UUID"
-
-          # C. Build
-          xcode-project build-ipa             --project "$XCODE_PROJECT"             --scheme "$XCODE_SCHEME"             --archive-flags "CODE_SIGN_STYLE=Manual PROVISIONING_PROFILE_SPECIFIER=$UUID"
+    artifacts:
+      - build/ios/ipa/*.ipa
+      - /tmp/xcodebuild_logs/*.log
 
     publishing:
       app_store_connect:
