@@ -198,7 +198,7 @@ export const BlattGame = () => {
             side="right" 
             className="w-[280px] bg-[hsl(222,47%,11%)] border-l-2 border-gold/50" style={{ paddingTop: "60px" }}
           >
-            <SheetHeader className="border-b border-gold/30 pb-4">
+            <SheetHeader className="border-b border-gold/30 pb-4 mt-16">
               <SheetTitle className="font-display text-2xl gold-text tracking-wider">
                 Menu
               </SheetTitle>
