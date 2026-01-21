@@ -28,7 +28,11 @@ workflows:
 
       - name: Install CocoaPods dependencies
         script: |
-          cd ios/App && pod install
+          if [ -f "ios/App/Podfile" ]; then
+            cd ios/App && pod install
+          else
+            echo "No Podfile found, skipping pod install"
+          fi
 
       - name: Set up code signing
         script: |
@@ -40,9 +44,15 @@ workflows:
 
       - name: Build IPA
         script: |
-          xcode-project build-ipa \
-            --workspace "ios/App/App.xcworkspace" \
-            --scheme "$XCODE_SCHEME"
+          if [ -d "ios/App/App.xcworkspace" ]; then
+            xcode-project build-ipa \
+              --workspace "ios/App/App.xcworkspace" \
+              --scheme "$XCODE_SCHEME"
+          else
+            xcode-project build-ipa \
+              --project "$XCODE_PROJECT" \
+              --scheme "$XCODE_SCHEME"
+          fi
 
     artifacts:
       - build/ios/ipa/*.ipa
