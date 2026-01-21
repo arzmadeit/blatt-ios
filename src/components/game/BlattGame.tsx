@@ -196,7 +196,7 @@ export const BlattGame = () => {
           </SheetTrigger>
           <SheetContent 
             side="right" 
-            className="w-[280px] bg-[hsl(222,47%,11%)] border-l-2 border-gold/50"
+            className="w-[280px] bg-[hsl(222,47%,11%)] border-l-2 border-gold/50" style={{ paddingTop: "env(safe-area-inset-top)" }}
           >
             <SheetHeader className="border-b border-gold/30 pb-4">
               <SheetTitle className="font-display text-2xl gold-text tracking-wider">
