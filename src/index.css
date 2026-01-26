@@ -483,3 +483,7 @@ html, body, #root {
   padding-top: env(safe-area-inset-top);
   min-height: 100vh;
 }
+/* Hide the Lovable badge from the App Store build */
+#lovable-badge {
+  display: none !important;
+}
