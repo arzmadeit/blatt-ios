@@ -9,6 +9,7 @@ workflows:
         BUNDLE_ID: "com.arzmadeit.blatt"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
+        CODE_SIGN_STYLE: "Automatic"
       xcode: latest
       cocoapods: default
     triggering:
