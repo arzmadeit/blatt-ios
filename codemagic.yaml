@@ -15,7 +15,7 @@ workflows:
     triggering:
       events:
         - push
-      branch_patterns:
+           branch_patterns:
         - pattern: main
     scripts:
       - name: Install dependencies and build web app
@@ -35,24 +35,20 @@ workflows:
             echo "No Podfile found, skipping pod install"
           fi
 
-      - name: Set up code signing
-        script: |
-          sed -i '' "s/PRODUCT_BUNDLE_IDENTIFIER = [^;]*;/PRODUCT_BUNDLE_IDENTIFIER = $BUNDLE_ID;/g" "$XCODE_PROJECT/project.pbxproj"
-          keychain initialize
-          app-store-connect fetch-signing-files "$BUNDLE_ID" --type IOS_APP_STORE --create
-          keychain add-certificates
-          xcode-project use-profiles
-
       - name: Build IPA
         script: |
           if [ -d "ios/App/App.xcworkspace" ]; then
             xcode-project build-ipa \
               --workspace "ios/App/App.xcworkspace" \
-              --scheme "$XCODE_SCHEME"
+              --scheme "$XCODE_SCHEME" \
+              --export-method app-store \
+              --automatic-signing
           else
             xcode-project build-ipa \
               --project "$XCODE_PROJECT" \
-              --scheme "$XCODE_SCHEME"
+              --scheme "$XCODE_SCHEME" \
+              --export-method app-store \
+              --automatic-signing
           fi
 
     artifacts:
