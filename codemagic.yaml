@@ -36,19 +36,9 @@ workflows:
           fi
       - name: Build IPA
         script: |
-          # Setup keychain for code signing
-          keychain initialize
-          
-          # Fetch signing files
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-          
-          # Add certificates to keychain
-          keychain add-certificates
-          
-          # Set code signing settings
-          xcode-project use-profiles
+          # Set the development team in the project file
+          sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = "'$TEAM_ID'";/g' ios/App/App.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' ios/App/App.xcodeproj/project.pbxproj
           
           # Create export options plist
           cat > /Users/builder/export_options.plist <<EOF
@@ -58,6 +48,8 @@ workflows:
           <dict>
               <key>method</key>
               <string>app-store</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
               <key>teamID</key>
               <string>$TEAM_ID</string>
               <key>uploadBitcode</key>
@@ -68,26 +60,42 @@ workflows:
           </plist>
           EOF
           
-          # Build archive
+          # Build archive with authentication
           if [ -d "ios/App/App.xcworkspace" ]; then
             xcodebuild archive \
               -workspace ios/App/App.xcworkspace \
               -scheme "$XCODE_SCHEME" \
               -configuration Release \
-              -archivePath build/ios/App.xcarchive
+              -archivePath build/ios/App.xcarchive \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath $APP_STORE_CONNECT_PRIVATE_KEY \
+              -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+              -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
+              CODE_SIGN_STYLE=Automatic \
+              DEVELOPMENT_TEAM=$TEAM_ID
           else
             xcodebuild archive \
               -project "$XCODE_PROJECT" \
               -scheme "$XCODE_SCHEME" \
               -configuration Release \
-              -archivePath build/ios/App.xcarchive
+              -archivePath build/ios/App.xcarchive \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath $APP_STORE_CONNECT_PRIVATE_KEY \
+              -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+              -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
+              CODE_SIGN_STYLE=Automatic \
+              DEVELOPMENT_TEAM=$TEAM_ID
           fi
           
           # Export IPA
           xcodebuild -exportArchive \
             -archivePath build/ios/App.xcarchive \
             -exportPath build/ios/ipa \
-            -exportOptionsPlist /Users/builder/export_options.plist
+            -exportOptionsPlist /Users/builder/export_options.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath $APP_STORE_CONNECT_PRIVATE_KEY \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
