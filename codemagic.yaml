@@ -63,6 +63,7 @@ workflows:
               -scheme "$XCODE_SCHEME" \
               -configuration Release \
               -archivePath build/ios/App.xcarchive \
+              -allowProvisioningUpdates \
               CODE_SIGN_STYLE=Automatic \
               DEVELOPMENT_TEAM=$TEAM_ID
           else
@@ -71,6 +72,7 @@ workflows:
               -scheme "$XCODE_SCHEME" \
               -configuration Release \
               -archivePath build/ios/App.xcarchive \
+              -allowProvisioningUpdates \
               CODE_SIGN_STYLE=Automatic \
               DEVELOPMENT_TEAM=$TEAM_ID
           fi
@@ -79,7 +81,8 @@ workflows:
           xcodebuild -exportArchive \
             -archivePath build/ios/App.xcarchive \
             -exportPath build/ios/ipa \
-            -exportOptionsPlist /Users/builder/export_options.plist
+            -exportOptionsPlist /Users/builder/export_options.plist \
+            -allowProvisioningUpdates
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
