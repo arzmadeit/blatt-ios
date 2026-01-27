@@ -26,7 +26,6 @@ workflows:
           bun install
           bun run build
           npx cap sync ios
-
       - name: Install CocoaPods dependencies
         script: |
           if [ -f "ios/App/Podfile" ]; then
@@ -34,27 +33,20 @@ workflows:
           else
             echo "No Podfile found, skipping pod install"
           fi
-
       - name: Build IPA
         script: |
           if [ -d "ios/App/App.xcworkspace" ]; then
             xcode-project build-ipa \
               --workspace "ios/App/App.xcworkspace" \
-              --scheme "$XCODE_SCHEME" \
-              --export-method app-store \
-              --automatic-signing
+              --scheme "$XCODE_SCHEME"
           else
             xcode-project build-ipa \
               --project "$XCODE_PROJECT" \
-              --scheme "$XCODE_SCHEME" \
-              --export-method app-store \
-              --automatic-signing
+              --scheme "$XCODE_SCHEME"
           fi
-
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
-
     publishing:
       app_store_connect:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
