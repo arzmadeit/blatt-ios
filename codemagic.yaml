@@ -109,14 +109,6 @@ workflows:
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
-```
-
-## Step 2: Update Build Number
-
-Edit `ios/App/App.xcodeproj/project.pbxproj` and change:
-```
-CURRENT_PROJECT_VERSION = 75;
-```
 to:
 ```
 CURRENT_PROJECT_VERSION = 76;
