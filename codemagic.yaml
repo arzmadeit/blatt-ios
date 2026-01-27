@@ -10,6 +10,7 @@ workflows:
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
         CODE_SIGN_STYLE: "Automatic"
+        TEAM_ID: "X53LJ84526"
       xcode: latest
       cocoapods: default
     triggering:
@@ -35,14 +36,37 @@ workflows:
           fi
       - name: Build IPA
         script: |
+          # Create export options plist
+          cat > /Users/builder/export_options.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>teamID</key>
+              <string>$TEAM_ID</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+              <key>signingStyle</key>
+              <string>automatic</string>
+          </dict>
+          </plist>
+          EOF
+          
+          # Build IPA
           if [ -d "ios/App/App.xcworkspace" ]; then
             xcode-project build-ipa \
               --workspace "ios/App/App.xcworkspace" \
-              --scheme "$XCODE_SCHEME"
+              --scheme "$XCODE_SCHEME" \
+              --export-options-plist /Users/builder/export_options.plist
           else
             xcode-project build-ipa \
               --project "$XCODE_PROJECT" \
-              --scheme "$XCODE_SCHEME"
+              --scheme "$XCODE_SCHEME" \
+              --export-options-plist /Users/builder/export_options.plist
           fi
     artifacts:
       - build/ios/ipa/*.ipa
