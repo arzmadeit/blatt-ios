@@ -56,18 +56,30 @@ workflows:
           </plist>
           EOF
           
-          # Build IPA
+          # Build archive
           if [ -d "ios/App/App.xcworkspace" ]; then
-            xcode-project build-ipa \
-              --workspace "ios/App/App.xcworkspace" \
-              --scheme "$XCODE_SCHEME" \
-              --export-options-plist /Users/builder/export_options.plist
+            xcodebuild archive \
+              -workspace ios/App/App.xcworkspace \
+              -scheme "$XCODE_SCHEME" \
+              -configuration Release \
+              -archivePath build/ios/App.xcarchive \
+              CODE_SIGN_STYLE=Automatic \
+              DEVELOPMENT_TEAM=$TEAM_ID
           else
-            xcode-project build-ipa \
-              --project "$XCODE_PROJECT" \
-              --scheme "$XCODE_SCHEME" \
-              --export-options-plist /Users/builder/export_options.plist
+            xcodebuild archive \
+              -project "$XCODE_PROJECT" \
+              -scheme "$XCODE_SCHEME" \
+              -configuration Release \
+              -archivePath build/ios/App.xcarchive \
+              CODE_SIGN_STYLE=Automatic \
+              DEVELOPMENT_TEAM=$TEAM_ID
           fi
+          
+          # Export IPA
+          xcodebuild -exportArchive \
+            -archivePath build/ios/App.xcarchive \
+            -exportPath build/ios/ipa \
+            -exportOptionsPlist /Users/builder/export_options.plist
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
