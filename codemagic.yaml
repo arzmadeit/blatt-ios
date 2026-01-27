@@ -24,7 +24,6 @@ workflows:
           curl -fsSL https://bun.sh/install | bash
           export BUN_INSTALL="$HOME/.bun"
           export PATH="$BUN_INSTALL/bin:$PATH"
-          rm -f bun.lockb package-lock.json
           bun install
           bun run build
           npx cap sync ios
