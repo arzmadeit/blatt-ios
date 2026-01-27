@@ -9,6 +9,7 @@ workflows:
         BUNDLE_ID: "com.arzmadeit.blatt"
         XCODE_PROJECT: "ios/App/App.xcodeproj"
         XCODE_SCHEME: "App"
+        CODE_SIGN_STYLE: "Automatic"
         TEAM_ID: "X53LJ84526"
       xcode: latest
       cocoapods: default
@@ -23,6 +24,7 @@ workflows:
           curl -fsSL https://bun.sh/install | bash
           export BUN_INSTALL="$HOME/.bun"
           export PATH="$BUN_INSTALL/bin:$PATH"
+          rm -f bun.lockb package-lock.json
           bun install
           bun run build
           npx cap sync ios
@@ -33,43 +35,71 @@ workflows:
           else
             echo "No Podfile found, skipping pod install"
           fi
-      - name: Set up code signing
-        script: |
-          # Initialize keychain for code signing
-          keychain initialize
-          
-          # Fetch signing files from Codemagic
-          app-store-connect fetch-signing-files "$BUNDLE_ID" \
-            --type IOS_APP_STORE \
-            --create
-          
-          # Add certificates to keychain
-          keychain add-certificates
-          
-          # Set up code signing settings
-          xcode-project use-profiles
       - name: Build IPA
         script: |
-          # Build archive
+          # Set the development team in the project file
+          sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = "'$TEAM_ID'";/g' ios/App/App.xcodeproj/project.pbxproj
+          sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' ios/App/App.xcodeproj/project.pbxproj
+          
+          # Save the App Store Connect API key to a file
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/api_key.p8
+          
+          # Create export options plist
+          cat > /Users/builder/export_options.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+              <key>method</key>
+              <string>app-store</string>
+              <key>signingStyle</key>
+              <string>automatic</string>
+              <key>teamID</key>
+              <string>$TEAM_ID</string>
+              <key>uploadBitcode</key>
+              <false/>
+              <key>uploadSymbols</key>
+              <true/>
+          </dict>
+          </plist>
+          EOF
+          
+          # Build archive with authentication
           if [ -d "ios/App/App.xcworkspace" ]; then
             xcodebuild archive \
               -workspace ios/App/App.xcworkspace \
               -scheme "$XCODE_SCHEME" \
               -configuration Release \
-              -archivePath build/ios/App.xcarchive
+              -archivePath build/ios/App.xcarchive \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath /tmp/api_key.p8 \
+              -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+              -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
+              CODE_SIGN_STYLE=Automatic \
+              DEVELOPMENT_TEAM=$TEAM_ID
           else
             xcodebuild archive \
               -project "$XCODE_PROJECT" \
               -scheme "$XCODE_SCHEME" \
               -configuration Release \
-              -archivePath build/ios/App.xcarchive
+              -archivePath build/ios/App.xcarchive \
+              -allowProvisioningUpdates \
+              -authenticationKeyPath /tmp/api_key.p8 \
+              -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+              -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
+              CODE_SIGN_STYLE=Automatic \
+              DEVELOPMENT_TEAM=$TEAM_ID
           fi
           
           # Export IPA
           xcodebuild -exportArchive \
             -archivePath build/ios/App.xcarchive \
             -exportPath build/ios/ipa \
-            -exportOptionsPlist ~/export_options.plist
+            -exportOptionsPlist /Users/builder/export_options.plist \
+            -allowProvisioningUpdates \
+            -authenticationKeyPath /tmp/api_key.p8 \
+            -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
+            -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
     artifacts:
       - build/ios/ipa/*.ipa
       - /tmp/xcodebuild_logs/*.log
@@ -79,3 +109,14 @@ workflows:
         key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
         issuer_id: $APP_STORE_CONNECT_ISSUER_ID
         submit_to_testflight: true
+```
+
+## Step 2: Update Build Number
+
+Edit `ios/App/App.xcodeproj/project.pbxproj` and change:
+```
+CURRENT_PROJECT_VERSION = 75;
+```
+to:
+```
+CURRENT_PROJECT_VERSION = 76;
