@@ -15,7 +15,7 @@ workflows:
     triggering:
       events:
         - push
-           branch_patterns:
+      branch_patterns:
         - pattern: main
     scripts:
       - name: Install dependencies and build web app
