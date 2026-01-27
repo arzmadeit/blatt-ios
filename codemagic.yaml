@@ -40,6 +40,9 @@ workflows:
           sed -i '' 's/DEVELOPMENT_TEAM = "";/DEVELOPMENT_TEAM = "'$TEAM_ID'";/g' ios/App/App.xcodeproj/project.pbxproj
           sed -i '' 's/CODE_SIGN_STYLE = Manual;/CODE_SIGN_STYLE = Automatic;/g' ios/App/App.xcodeproj/project.pbxproj
           
+          # Save the App Store Connect API key to a file
+          echo "$APP_STORE_CONNECT_PRIVATE_KEY" > /tmp/api_key.p8
+          
           # Create export options plist
           cat > /Users/builder/export_options.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
@@ -68,7 +71,7 @@ workflows:
               -configuration Release \
               -archivePath build/ios/App.xcarchive \
               -allowProvisioningUpdates \
-              -authenticationKeyPath $APP_STORE_CONNECT_PRIVATE_KEY \
+              -authenticationKeyPath /tmp/api_key.p8 \
               -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
               -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
               CODE_SIGN_STYLE=Automatic \
@@ -80,7 +83,7 @@ workflows:
               -configuration Release \
               -archivePath build/ios/App.xcarchive \
               -allowProvisioningUpdates \
-              -authenticationKeyPath $APP_STORE_CONNECT_PRIVATE_KEY \
+              -authenticationKeyPath /tmp/api_key.p8 \
               -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
               -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID \
               CODE_SIGN_STYLE=Automatic \
@@ -93,7 +96,7 @@ workflows:
             -exportPath build/ios/ipa \
             -exportOptionsPlist /Users/builder/export_options.plist \
             -allowProvisioningUpdates \
-            -authenticationKeyPath $APP_STORE_CONNECT_PRIVATE_KEY \
+            -authenticationKeyPath /tmp/api_key.p8 \
             -authenticationKeyID $APP_STORE_CONNECT_KEY_IDENTIFIER \
             -authenticationKeyIssuerID $APP_STORE_CONNECT_ISSUER_ID
     artifacts:
