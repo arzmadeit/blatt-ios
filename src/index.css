@@ -491,24 +491,29 @@ html, body, #root {
 #lovable-badge {
   display: none !important;
 }
-/* 1. iOS Safe Area support for the Notch and Home Bar */
-body {
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
-}
-
-/* 2. Lock the screen and stop the wobbly bounce effect */
+/* 1. Lock the screen and stop the wobbly bounce effect */
 html, body, #root {
-  position: fixed; /* Fixes the app to the window */
-  overflow: hidden; /* Prevents the page from scrolling */
-  width: 100%;
-  height: 100%;
-  overscroll-behavior: none; /* Disables pull-to-refresh and elastic bounce */
-  -webkit-overflow-scrolling: touch;
-  touch-action: none; /* Ensures swipes move tiles, not the whole app */
+  position: fixed; 
+  top: 0;
+  left: 0;
+  overflow: hidden; 
+  width: 100vw;
+  height: 100vh;
+  overscroll-behavior: none; 
+  touch-action: none; 
+  margin: 0;
+  padding: 0; /* Remove top padding to let it slide under the notch */
 }
 
-/* 3. Hidden Badge Cleanup (Permanent Insurance) */
+/* 2. Optional: If you need a little space for the UI but want the background full screen */
+#root {
+  display: flex;
+  flex-direction: column;
+  /* Adjust this padding if your "BLATT" logo is too high up under the notch */
+  padding-top: env(safe-area-inset-top); 
+}
+
+/* 3. Final Badge Cleanup */
 #lovable-badge, [class*="lovable"] {
   display: none !important;
-  visibility: hidden !important;
 }
