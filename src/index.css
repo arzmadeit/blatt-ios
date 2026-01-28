@@ -491,3 +491,24 @@ html, body, #root {
 #lovable-badge {
   display: none !important;
 }
+/* 1. iOS Safe Area support for the Notch and Home Bar */
+body {
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* 2. Lock the screen and stop the wobbly bounce effect */
+html, body, #root {
+  position: fixed; /* Fixes the app to the window */
+  overflow: hidden; /* Prevents the page from scrolling */
+  width: 100%;
+  height: 100%;
+  overscroll-behavior: none; /* Disables pull-to-refresh and elastic bounce */
+  -webkit-overflow-scrolling: touch;
+  touch-action: none; /* Ensures swipes move tiles, not the whole app */
+}
+
+/* 3. Hidden Badge Cleanup (Permanent Insurance) */
+#lovable-badge, [class*="lovable"] {
+  display: none !important;
+  visibility: hidden !important;
+}
